@@ -66,17 +66,25 @@ export default class Account {
 
     const expectedChecksum = calculateChecksum(payload);
 
-    if (checksum != expectedChecksum) {
+    if (checksum.compare(expectedChecksum) != 0) {
       throw Error('Invalid checksum');
     }
 
     return new Account(data, null);
   }
-
+  
   static fromSeed(seed: Buffer): Account {
     return new Account(null, Buffer.from(nacl.sign.keyPair.fromSeed(seed).secretKey));
   }
+  
+  static fromPublicKey(publicKey: Buffer): Account {
+    return new Account(publicKey, null);
+  }
 
+  static fromPrivateKey(privateKey: Buffer): Account {
+    return new Account(null, privateKey);
+  }
+  
   static generate(): Account {
     return new Account(null, Buffer.from(nacl.sign.keyPair().secretKey));
   }
