@@ -1,0 +1,19 @@
+{
+  "name": "liquid-chain",
+  "version": "1.0.0",
+  "description": "Liquid Chain JS SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "author": "Kha Do <kha.do@quoine.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^1.19.1",
+    "tslint": "^5.20.1",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.7.4"
+  }
+}
