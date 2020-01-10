@@ -1,1 +1,3 @@
-console.log('Liquid Chain');
+import Account from './account';
+
+export { Account };
