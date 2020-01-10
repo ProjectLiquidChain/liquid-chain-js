@@ -2,13 +2,14 @@
   "name": "liquid-chain",
   "version": "1.0.0",
   "description": "Liquid Chain JS SDK",
+  "repository": "git@github.com:QuoineFinancial/liquid-chain-js.git",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "lint": "tslint -p tsconfig.json"
   },
-  "author": "Kha Do <kha.do@quoine.com>",
+  "author": "Kha Do <kha.do@liquid.com>",
   "license": "MIT",
   "devDependencies": {
     "@types/crc": "^3.4.0",
