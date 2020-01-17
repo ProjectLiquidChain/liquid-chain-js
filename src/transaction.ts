@@ -1,5 +1,6 @@
 import Account from './account';
 import { encode } from 'rlp';
+import { createHash } from 'blake2';
 
 export default class Transaction {
   // signer
@@ -38,8 +39,9 @@ export default class Transaction {
   }
 
   hash(): Buffer {
-    // TODO: Hash transaction
-    return this.serialize(false);
+    const hash = createHash('blake2b');
+    hash.update(this.serialize(false));
+    return hash.digest();
   }
 
   sign(): Buffer {
