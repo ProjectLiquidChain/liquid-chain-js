@@ -24,6 +24,7 @@
   "dependencies": {
     "base32.js": "^0.1.0",
     "blake2": "^4.0.0",
+    "bn.js": "^5.1.1",
     "crc": "^3.8.0",
     "rlp": "^2.2.4",
     "tweetnacl": "^1.0.1"
