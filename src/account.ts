@@ -40,7 +40,7 @@ export default class Account {
     return this.publicKey;
   }
 
-  getPrivateKey(): Buffer | null | undefined {
+  getPrivateKey(): Buffer | undefined {
     return this.privateKey;
   }
 
