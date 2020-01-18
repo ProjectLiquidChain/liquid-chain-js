@@ -56,12 +56,11 @@ export default class Account {
     return nacl.sign.detached.verify(message, signature, this.publicKey);
   }
 
-  static fromString(encoded: string): Account {
-    const decoded: Buffer = base32.decode(encoded);
-    const versionByte = decoded[0];
-    const payload = decoded.slice(0, -2);
+  static fromAddress(address: Buffer): Account {
+    const versionByte = address[0];
+    const payload = address.slice(0, -2);
     const data = payload.slice(1);
-    const checksum = decoded.slice(-2);
+    const checksum = address.slice(-2);
 
     if (versionByte != VERSION_BYTE_ACCOUNT) {
       throw Error('Invalid version byte');
@@ -74,6 +73,10 @@ export default class Account {
     }
 
     return new Account(data);
+  }
+
+  static fromString(encoded: string): Account {
+    return Account.fromAddress(base32.decode(encoded));
   }
   
   static fromSeed(seed: Buffer): Account {
