@@ -4,7 +4,6 @@ import { createHash } from 'blake2';
 import BN from 'bn.js';
 
 export interface TransactionJSON {
-  hash: string;
   from: string;
   nonce: string;
   signture?: string;
@@ -50,14 +49,14 @@ export default class Transaction {
     ]);
   }
 
-  hash(): Buffer {
+  getSignatureHash(): Buffer {
     const hash = createHash('blake2b');
     hash.update(this.serialize(false));
     return hash.digest();
   }
 
   sign(): Buffer {
-    this.signature = this.from.sign(this.hash());
+    this.signature = this.from.sign(this.getSignatureHash());
     return this.signature;
   }
 
@@ -95,7 +94,6 @@ export default class Transaction {
 
   toJSON(): TransactionJSON {
     return {
-      hash: this.hash().toString('hex'),
       from: this.from.toString(),
       nonce: this.nonce.toString(),
       signture: this.signature ? this.signature.toString('hex') : undefined,
