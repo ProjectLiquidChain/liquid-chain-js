@@ -6,7 +6,7 @@ import BN from 'bn.js';
 export interface TransactionJSON {
   from: string;
   nonce: string;
-  signture?: string;
+  signature?: string;
   data?: string;
   to?: string;
   gasPrice: string;
@@ -96,7 +96,7 @@ export default class Transaction {
     return {
       from: this.from.toString(),
       nonce: this.nonce.toString(),
-      signture: this.signature ? this.signature.toString('hex') : undefined,
+      signature: this.signature ? this.signature.toString('hex') : undefined,
       data: this.data ? this.data.toString('hex') : undefined,
       to: this.to ? this.to.toString() : undefined,
       gasPrice: this.gasPrice.toString(),
