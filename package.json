@@ -7,16 +7,22 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "lint": "tslint -p tsconfig.json"
+    "lint": "tslint -p tsconfig.json",
+    "test": "mocha -r ts-node/register tests/**.ts"
   },
   "author": "Kha Do <kha.do@liquid.com>",
   "license": "MIT",
   "devDependencies": {
     "@types/blake2": "^4.0.0",
     "@types/bn.js": "^4.11.6",
+    "@types/chai": "^4.2.7",
     "@types/crc": "^3.4.0",
+    "@types/mocha": "^5.2.7",
     "@types/node": "^13.1.6",
+    "chai": "^4.2.0",
+    "mocha": "^7.0.0",
     "prettier": "^1.19.1",
+    "ts-node": "^8.6.2",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.7.4"

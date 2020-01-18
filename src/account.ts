@@ -9,7 +9,7 @@ export const ADDRESS_LENGTH = 35;
 
 export default class Account {
   private publicKey: Buffer;
-  private privateKey: Buffer | null;
+  private privateKey?: Buffer;
 
   private constructor(publicKey?: Buffer, privateKey?: Buffer) {
     if (privateKey) {
@@ -21,7 +21,6 @@ export default class Account {
         throw Error('Missing public key');
       }
       this.publicKey = publicKey;
-      this.privateKey = null;
     }
   }
 
