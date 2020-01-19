@@ -25,7 +25,15 @@ export default class Transaction {
   private gasPrice: BN;
   private gasLimit: BN;
   
-  constructor(params: { from: Account, nonce: number | BN, to?: Account, data?: Buffer, gasPrice: number | BN, gasLimit: number | BN, signature?: Buffer }) {
+  constructor(params: { 
+      from: Account;
+      nonce: number | BN;
+      to?: Account;
+      data?: Buffer;
+      gasPrice: number | BN;
+      gasLimit: number | BN;
+      signature?: Buffer;
+    }) {
     if (!params.to && !params.data) {
       throw Error('Either `to` or `data` should be specified');
     }
@@ -38,7 +46,7 @@ export default class Transaction {
     this.signature = params.signature;
   }
 
-  serialize(includeSignature: boolean = true): Buffer {
+  serialize(includeSignature = true): Buffer {
     const signer = [
       this.from.getPublicKey(),
       this.nonce,
@@ -92,7 +100,10 @@ export default class Transaction {
     return this.gasLimit;
   }
 
-  setSignature(signture: Buffer) {
+  setSignature(signture: Buffer): void {
+    if (this.from.verify(this.getSignatureHash(), signture)) {
+      throw Error('Invalid signature');
+    }
     this.signature = signture;
   }
 
@@ -109,6 +120,7 @@ export default class Transaction {
   }
 
   static deserialize(data: Buffer): Transaction {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const decoded: any = decode(data);
     const signer: Buffer[] = decoded[0];
     const tx: Buffer[] = decoded;

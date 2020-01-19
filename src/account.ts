@@ -2,7 +2,15 @@ import { crc16xmodem } from 'crc';
 import { sign } from 'tweetnacl';
 import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH, VERSION_BYTE_ACCOUNT } from './constants';
 // base32 do not have type defination
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const base32 = require('base32.js');
+
+
+function calculateChecksum(payload: Buffer): Buffer {
+  const checksum = Buffer.alloc(2);
+  checksum.writeUInt16LE(crc16xmodem(payload), 0);
+  return checksum;
+}
 
 export default class Account {
   private key: Buffer;
@@ -84,10 +92,3 @@ export default class Account {
     return new Account(Buffer.from(sign.keyPair().secretKey));
   }
 }
-
-function calculateChecksum(payload: Buffer): Buffer {
-  const checksum = Buffer.alloc(2);
-  checksum.writeUInt16LE(crc16xmodem(payload), 0);
-  return checksum;
-}
-
