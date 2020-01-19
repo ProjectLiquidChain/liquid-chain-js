@@ -34,17 +34,19 @@ export default class Account {
     return this.key.slice(-PUBLIC_KEY_LENGTH);
   }
 
-  getPrivateKey(): Buffer | undefined {
-    if (this.key.length === PRIVATE_KEY_LENGTH) {
-      return this.key;
+  hasPrivateKey(): boolean {
+    return this.key.length === PRIVATE_KEY_LENGTH;
+  }
+
+  getPrivateKey(): Buffer {
+    if (!this.hasPrivateKey()) {
+      throw Error('Missing private key');
     }
+    return this.key;
   }
 
   sign(message: Buffer): Buffer {
-    if (!this.getPrivateKey()) {
-      throw Error('Missing private key');
-    }
-    return Buffer.from(nacl.sign.detached(message, this.key));
+    return Buffer.from(nacl.sign.detached(message, this.getPrivateKey()));
   }
 
   verify(message: Buffer, signature: Buffer): boolean {

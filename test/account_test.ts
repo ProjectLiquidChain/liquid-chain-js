@@ -1,4 +1,3 @@
-import 'mocha';
 import { expect, should } from 'chai';
 import Account from '../src/account';
 import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH } from '../src/constants';
@@ -11,7 +10,7 @@ describe('Account', function () {
       it('should return account', function () {
         const a = new Account(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex'));
         a.getPublicKey().compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
-        expect(a.getPrivateKey()).to.be.undefined;
+        a.hasPrivateKey().should.be.false;
       });
     });
 
@@ -19,11 +18,7 @@ describe('Account', function () {
       it('should return account', function () {
         const a = new Account(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex'));
         a.getPublicKey().compare(Buffer.from('cfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
-        const privateKey = a.getPrivateKey();
-        if (!privateKey) {
-          throw Error('Missing private key');
-        }
-        privateKey.compare(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
+        a.getPrivateKey().compare(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
       });
     });
 
@@ -41,7 +36,7 @@ describe('Account', function () {
       it('should return account', function () {
         const a = Account.fromString('LADSUJQLIKT4WBBLGLJ6Q36DEBJ6KFBQIIABD6B3ZWF7NIE4RIZURI53');
         a.getPublicKey().compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
-        expect(a.getPrivateKey()).to.be.undefined;
+        a.hasPrivateKey().should.be.false;
       });
     });
 
@@ -75,7 +70,7 @@ describe('Account', function () {
       it('should return account', function () {
         const a = Account.fromAddress(Buffer.from('58072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348a3bb', 'hex'));
         a.getPublicKey().compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
-        expect(a.getPrivateKey()).to.be.undefined;
+        a.hasPrivateKey().should.be.false;
       });
     });
 
@@ -93,11 +88,7 @@ describe('Account', function () {
       it('should return account', function () {
         const a = Account.fromSeed(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16d', 'hex'));
         a.getPublicKey().compare(Buffer.from('cfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
-        const privateKey = a.getPrivateKey();
-        if (!privateKey) {
-          throw Error('Missing private key');
-        }
-        privateKey.compare(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
+        a.getPrivateKey().compare(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
       });
     });
 
@@ -114,11 +105,7 @@ describe('Account', function () {
     it('should return account', function () {
       const a = Account.generate();
       a.getPublicKey().length.should.equal(PUBLIC_KEY_LENGTH);
-      const privateKey = a.getPrivateKey();
-      if (!privateKey) {
-        throw Error('Missing private key');
-      }
-      privateKey.length.should.equal(PRIVATE_KEY_LENGTH);
+      a.getPrivateKey().length.should.equal(PRIVATE_KEY_LENGTH);
     })
   });
 
