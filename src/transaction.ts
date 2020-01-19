@@ -1,4 +1,5 @@
-import { Account, ADDRESS_LENGTH } from './account';
+import Account from './account';
+import { ADDRESS_LENGTH } from './constants';
 import { encode, decode } from 'rlp';
 import { createHash } from 'blake2';
 import BN from 'bn.js';
@@ -13,7 +14,7 @@ export interface TransactionJSON {
   gasLimit: string;
 }
 
-export class Transaction {
+export default class Transaction {
   // signer
   private from: Account;
   private nonce: BN;

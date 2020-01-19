@@ -1,15 +1,10 @@
 import crc from 'crc';
 import nacl from 'tweetnacl';
+import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH, VERSION_BYTE_ACCOUNT } from './constants';
 // base32 do not have type defination
 const base32 = require('base32.js');
 
-// 'L'
-export const VERSION_BYTE_ACCOUNT = 11 << 3;
-export const ADDRESS_LENGTH = 35;
-export const PUBLIC_KEY_LENGTH = 32;
-export const PRIVATE_KEY_LENGTH = 64;
-
-export class Account {
+export default class Account {
   private key: Buffer;
 
   constructor(key: Buffer) {

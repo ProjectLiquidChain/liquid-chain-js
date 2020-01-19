@@ -1,6 +1,7 @@
 import 'mocha';
 import { expect, should } from 'chai';
-import { Account, PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH } from '../src/account';
+import Account from '../src/account';
+import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH } from '../src/constants';
 
 should();
 
