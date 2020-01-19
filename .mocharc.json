@@ -3,7 +3,6 @@
   "extension": [
     "ts"
   ],
-  "package": "./package.json",
   "require": "ts-node/register",
   "watch-files": [
     "src/**/*.ts",
