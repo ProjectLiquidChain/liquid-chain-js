@@ -6,21 +6,20 @@ const base32 = require('base32.js');
 // 'L'
 export const VERSION_BYTE_ACCOUNT = 11 << 3;
 export const ADDRESS_LENGTH = 35;
+export const PUBLIC_KEY_LENGTH = 32;
+export const PRIVATE_KEY_LENGTH = 64;
 
-export default class Account {
-  private publicKey: Buffer;
-  private privateKey?: Buffer;
+export class Account {
+  private key: Buffer;
 
-  private constructor(publicKey?: Buffer, privateKey?: Buffer) {
-    if (privateKey) {
-      const keyPair = nacl.sign.keyPair.fromSecretKey(privateKey);
-      this.privateKey = privateKey;
-      this.publicKey = Buffer.from(keyPair.publicKey);
+  constructor(key: Buffer) {
+    if (key.length === PRIVATE_KEY_LENGTH) {
+      nacl.sign.keyPair.fromSecretKey(key);
+      this.key = key;
+    } else if (key.length === PUBLIC_KEY_LENGTH) {
+      this.key = key;
     } else {
-      if (!publicKey) {
-        throw Error('Missing public key');
-      }
-      this.publicKey = publicKey;
+      throw Error('Invalid key');
     }
   }
 
@@ -30,29 +29,31 @@ export default class Account {
 
   getAddress(): Buffer {
     const versionBuffer = Buffer.from([VERSION_BYTE_ACCOUNT]);
-    const payload = Buffer.concat([versionBuffer, this.publicKey]);
+    const payload = Buffer.concat([versionBuffer, this.getPublicKey()]);
     const checksum = calculateChecksum(payload);
     const unencoded = Buffer.concat([payload, checksum]);
     return unencoded;
   }
 
   getPublicKey(): Buffer {
-    return this.publicKey;
+    return this.key.slice(-PUBLIC_KEY_LENGTH);
   }
 
   getPrivateKey(): Buffer | undefined {
-    return this.privateKey;
+    if (this.key.length === PRIVATE_KEY_LENGTH) {
+      return this.key;
+    }
   }
 
   sign(message: Buffer): Buffer {
-    if (!this.privateKey) {
+    if (!this.getPrivateKey()) {
       throw Error('Missing private key');
     }
-    return Buffer.from(nacl.sign.detached(message, this.privateKey));
+    return Buffer.from(nacl.sign.detached(message, this.key));
   }
 
   verify(message: Buffer, signature: Buffer): boolean {
-    return nacl.sign.detached.verify(message, signature, this.publicKey);
+    return nacl.sign.detached.verify(message, signature, this.getPublicKey());
   }
 
   static fromAddress(address: Buffer): Account {
@@ -61,13 +62,13 @@ export default class Account {
     const data = payload.slice(1);
     const checksum = address.slice(-2);
 
-    if (versionByte != VERSION_BYTE_ACCOUNT) {
+    if (versionByte !== VERSION_BYTE_ACCOUNT) {
       throw Error('Invalid version byte');
     }
 
     const expectedChecksum = calculateChecksum(payload);
 
-    if (checksum.compare(expectedChecksum) != 0) {
+    if (checksum.compare(expectedChecksum) !== 0) {
       throw Error('Invalid checksum byte');
     }
 
@@ -79,19 +80,11 @@ export default class Account {
   }
   
   static fromSeed(seed: Buffer): Account {
-    return new Account(undefined, Buffer.from(nacl.sign.keyPair.fromSeed(seed).secretKey));
-  }
-  
-  static fromPublicKey(publicKey: Buffer): Account {
-    return new Account(publicKey);
-  }
-
-  static fromPrivateKey(privateKey: Buffer): Account {
-    return new Account(undefined, privateKey);
+    return new Account(Buffer.from(nacl.sign.keyPair.fromSeed(seed).secretKey));
   }
   
   static generate(): Account {
-    return new Account(undefined, Buffer.from(nacl.sign.keyPair().secretKey));
+    return new Account(Buffer.from(nacl.sign.keyPair().secretKey));
   }
 }
 

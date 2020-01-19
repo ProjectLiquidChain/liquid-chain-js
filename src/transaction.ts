@@ -1,4 +1,4 @@
-import Account from './account';
+import { Account, ADDRESS_LENGTH } from './account';
 import { encode, decode } from 'rlp';
 import { createHash } from 'blake2';
 import BN from 'bn.js';
@@ -13,7 +13,7 @@ export interface TransactionJSON {
   gasLimit: string;
 }
 
-export default class Transaction {
+export class Transaction {
   // signer
   private from: Account;
   private nonce: BN;
@@ -43,7 +43,7 @@ export default class Transaction {
     return encode([
       signer,
       this.data ? this.data : null,
-      this.to ? this.to.getAddress() : Buffer.alloc(35),
+      this.to ? this.to.getAddress() : Buffer.alloc(ADDRESS_LENGTH),
       this.gasLimit,
       this.gasPrice,
     ]);
@@ -109,7 +109,7 @@ export default class Transaction {
     const signer: Buffer[] = decoded[0];
     const tx: Buffer[] = decoded;
     return new Transaction({
-      from: Account.fromPublicKey(signer[0]),
+      from: new Account(signer[0]),
       nonce: new BN(signer[1]),
       signature: signer[2].length > 0 ? signer[2] : undefined,
       data: tx[1].length ? tx[1] : undefined,
