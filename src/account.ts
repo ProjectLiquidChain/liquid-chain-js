@@ -1,5 +1,5 @@
-import crc from 'crc';
-import nacl from 'tweetnacl';
+import { crc16xmodem } from 'crc';
+import { sign } from 'tweetnacl';
 import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH, VERSION_BYTE_ACCOUNT } from './constants';
 // base32 do not have type defination
 const base32 = require('base32.js');
@@ -9,7 +9,7 @@ export default class Account {
 
   constructor(key: Buffer) {
     if (key.length === PRIVATE_KEY_LENGTH) {
-      nacl.sign.keyPair.fromSecretKey(key);
+      sign.keyPair.fromSecretKey(key);
       this.key = key;
     } else if (key.length === PUBLIC_KEY_LENGTH) {
       this.key = key;
@@ -46,11 +46,11 @@ export default class Account {
   }
 
   sign(message: Buffer): Buffer {
-    return Buffer.from(nacl.sign.detached(message, this.getPrivateKey()));
+    return Buffer.from(sign.detached(message, this.getPrivateKey()));
   }
 
   verify(message: Buffer, signature: Buffer): boolean {
-    return nacl.sign.detached.verify(message, signature, this.getPublicKey());
+    return sign.detached.verify(message, signature, this.getPublicKey());
   }
 
   static fromAddress(address: Buffer): Account {
@@ -77,17 +77,17 @@ export default class Account {
   }
   
   static fromSeed(seed: Buffer): Account {
-    return new Account(Buffer.from(nacl.sign.keyPair.fromSeed(seed).secretKey));
+    return new Account(Buffer.from(sign.keyPair.fromSeed(seed).secretKey));
   }
   
   static generate(): Account {
-    return new Account(Buffer.from(nacl.sign.keyPair().secretKey));
+    return new Account(Buffer.from(sign.keyPair().secretKey));
   }
 }
 
 function calculateChecksum(payload: Buffer): Buffer {
   const checksum = Buffer.alloc(2);
-  checksum.writeUInt16LE(crc.crc16xmodem(payload), 0);
+  checksum.writeUInt16LE(crc16xmodem(payload), 0);
   return checksum;
 }
 
