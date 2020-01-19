@@ -26,6 +26,9 @@ export default class Transaction {
   private gasLimit: BN;
   
   constructor(params: { from: Account, nonce: number | BN, to?: Account, data?: Buffer, gasPrice: number | BN, gasLimit: number | BN, signature?: Buffer }) {
+    if (!params.to && !params.data) {
+      throw Error('Either `to` or `data` should be specified');
+    }
     this.from = params.from;
     this.nonce = new BN(params.nonce);
     this.data = params.data;
