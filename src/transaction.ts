@@ -1,6 +1,6 @@
 import Account from './account';
 import { NULL_ADDRESS, SIGNATURE_HASH_LENGTH } from './constants';
-import { encode, decode } from 'rlp';
+import { encode, decode } from './rlp';
 import { createHash } from 'blake2';
 import BN from 'bn.js';
 
@@ -120,10 +120,9 @@ export default class Transaction {
   }
 
   static deserialize(data: Buffer): Transaction {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const decoded: any = decode(data);
-    const signer: Buffer[] = decoded[0];
-    const tx: Buffer[] = decoded;
+    const decoded = decode(data);
+    const signer = decoded[0] as Buffer[];
+    const tx = decoded as Buffer[];
     return new Transaction({
       from: new Account(signer[0]),
       nonce: new BN(signer[1]),
