@@ -5,7 +5,6 @@ import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH, VERSION_BYTE_ACCOUNT } from './c
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const base32 = require('base32.js');
 
-
 function calculateChecksum(payload: Buffer): Buffer {
   const checksum = Buffer.alloc(2);
   checksum.writeUInt16LE(crc16xmodem(payload), 0);

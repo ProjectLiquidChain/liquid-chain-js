@@ -7,6 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
+    "postinstall": "tsc",
     "lint": "eslint ./src/**/*.ts",
     "test": "mocha",
     "coverage": "nyc mocha"
