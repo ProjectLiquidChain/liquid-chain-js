@@ -1,5 +1,5 @@
 
-import { encode, decode } from './rlp';
+import { encode, decode } from 'rlp';
 import { RecursiveBuffer } from './types';
 
 export enum PrimitiveType {
@@ -128,10 +128,6 @@ export class Function {
 }
 
 export class Event extends Function {
-  toJSON(): EventJSON {
-    return super.toJSON();
-  }
-
   static fromBuffer(decoded: RecursiveBuffer): Event {
     return Function.fromBuffer(decoded) as Event;
   }
@@ -179,7 +175,7 @@ export class Header {
   }
 
   static deserialize(data: Buffer): Header {
-    const decoded = decode(data);
+    const decoded = decode(data) as RecursiveBuffer;
     const functions = decoded[1] as RecursiveBuffer[];
     const events = decoded[2] as RecursiveBuffer[];
     return new Header(

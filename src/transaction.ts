@@ -1,8 +1,9 @@
 import Account from './account';
 import { NULL_ADDRESS, SIGNATURE_HASH_LENGTH } from './constants';
-import { encode, decode } from './rlp';
+import { encode, decode } from 'rlp';
 import { createHash } from 'blake2';
 import BN from 'bn.js';
+import { RecursiveBuffer } from './types';
 
 export interface TransactionJSON {
   from: string;
@@ -120,7 +121,7 @@ export default class Transaction {
   }
 
   static deserialize(data: Buffer): Transaction {
-    const decoded = decode(data);
+    const decoded = decode(data) as RecursiveBuffer;
     const signer = decoded[0] as Buffer[];
     const tx = decoded as Buffer[];
     return new Transaction({

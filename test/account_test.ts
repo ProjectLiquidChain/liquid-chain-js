@@ -1,4 +1,3 @@
-
 import { should } from 'chai';
 import Account from '../src/account';
 import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH } from '../src/constants';
