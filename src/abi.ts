@@ -1,5 +1,6 @@
 
 import { encode, decode } from 'rlp';
+import Account from './account';
 import { RecursiveBuffer } from './types';
 
 export enum PrimitiveType {
@@ -57,6 +58,60 @@ export class Parameter {
     };
   }
 
+  encode(values: string | string[]): Buffer | Buffer[] {
+    if (this.isArray && Array.isArray(values)) {
+      return values.map(v => this.encode(v) as Buffer);
+    }
+    let ret: Buffer;
+    const value = values as string;
+    switch (this.type) {
+      case PrimitiveType.Uint8:
+        ret = Buffer.alloc(1);
+        ret.writeUInt8(parseInt(value), 0);
+        break;
+      case PrimitiveType.Uint16:
+        ret = Buffer.alloc(2);
+        ret.writeUInt16LE(parseInt(value), 0);
+        break;
+      case PrimitiveType.Uint32:
+        ret = Buffer.alloc(4);
+        ret.writeUInt32LE(parseInt(value), 0);
+        break;
+      case PrimitiveType.Uint64:
+        ret = Buffer.alloc(8);
+        ret.writeBigUInt64LE(BigInt(value), 0);
+        break;
+      case PrimitiveType.Int8:
+        ret = Buffer.alloc(1);
+        ret.writeInt8(parseInt(value), 0);
+        break;
+      case PrimitiveType.Int16:
+        ret = Buffer.alloc(2);
+        ret.writeInt16LE(parseInt(value), 0);
+        break;
+      case PrimitiveType.Int32:
+        ret = Buffer.alloc(4);
+        ret.writeInt32LE(parseInt(value), 0);
+        break;
+      case PrimitiveType.Int64:
+        ret = Buffer.alloc(8);
+        ret.writeBigInt64LE(BigInt(value), 0);
+        break;
+      case PrimitiveType.Float32:
+        ret = Buffer.alloc(4);
+        ret.writeFloatLE(parseFloat(value), 0);
+        break;
+      case PrimitiveType.Float64:
+        ret = Buffer.alloc(8);
+        ret.writeDoubleLE(parseFloat(value), 0);
+        break;
+      case PrimitiveType.Address:
+        ret = Account.fromString(value).getAddress();
+        break;
+    }
+    return ret;
+  }
+
   static fromBuffer(decoded: RecursiveBuffer): Parameter {
     const data = decoded as Buffer[];
     return new Parameter(
@@ -110,6 +165,13 @@ export class Function {
       name: this.name,
       parameters: this.parameters.map(p => p.toJSON()),
     }
+  }
+
+  encode(values: (string | string[])[]): Buffer {
+    return encode([
+      this.name,
+      encode(values.map((v, i) => this.parameters[i].encode(v))),
+    ]);
   }
 
   static fromBuffer(decoded: RecursiveBuffer): Function {

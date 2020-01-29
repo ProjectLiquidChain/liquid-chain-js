@@ -1,7 +1,7 @@
 import { should } from 'chai';
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { Header } from '../src/abi';
+import { Header, Function, Parameter, PrimitiveType } from '../src/abi';
 
 should();
 
@@ -41,6 +41,18 @@ describe('Header', function () {
     it('should return binary', function () {
       const header = Header.deserialize(sampleBytes);
       header.serialize().compare(sampleBytes).should.equal(0);
+    });
+  });
+});
+
+describe('Function', function () {
+  describe('#encode', function () {
+    it('should return encoded data', function () {
+      const sampleJSON = JSON.parse(readFileSync(join(__dirname, 'parameters-abi.json'), 'utf-8'));
+      const header = Header.fromJSON(sampleJSON);
+      const data = header.functions[0].encode(['1', '256', '65536', '4294967296', '-1', '-1', '-1', '-1', '1.0', '1.0', 'LADSUJQLIKT4WBBLGLJ6Q36DEBJ6KFBQIIABD6B3ZWF7NIE4RIZURI53', ['1', '2', '3']]);
+      data.compare(Buffer.from('f8648474657374b85df85b01820001840000010088000000000100000081ff82ffff84ffffffff88ffffffffffffffff840000803f88000000000000f03fa358072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348a3bbc3010203', 'hex'))
+        .should.equal(0);
     });
   });
 });
