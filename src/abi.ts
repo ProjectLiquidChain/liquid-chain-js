@@ -106,7 +106,7 @@ export class Parameter {
         ret.writeDoubleLE(parseFloat(value), 0);
         break;
       case PrimitiveType.Address:
-        ret = Account.fromString(value).getAddress();
+        ret = Account.fromString(value).address;
         break;
     }
     return ret;
@@ -218,9 +218,12 @@ export class Header {
     this.events.sort((e1, e2) => {
       return e1.name.localeCompare(e2.name);
     });
+    this.functions.sort((e1, e2) => {
+      return e1.name.localeCompare(e2.name);
+    });
   }
 
-  serialize(): Buffer {
+  toBuffer(): Buffer {
     return encode([
       this.version,
       this.functions.map(f => f.toArray()),
@@ -231,12 +234,12 @@ export class Header {
   toJSON(): HeaderJSON {
     return {
       version: this.version,
-      functions: this.functions.map(f => f.toJSON()),
+      functions: this.functions.map(f => f.toJSON()).sort(),
       events: this.events.map(e => e.toJSON()),
     }
   }
 
-  static deserialize(data: Buffer): Header {
+  static fromBuffer(data: Buffer): Header {
     const decoded = decode(data) as RecursiveBuffer;
     const functions = decoded[1] as RecursiveBuffer[];
     const events = decoded[2] as RecursiveBuffer[];
@@ -253,5 +256,27 @@ export class Header {
       json.functions.map(f => Function.fromJSON(f)),
       json.events.map(e => Event.fromJSON(e)),
     );
+  }
+}
+
+export class Contract {
+  header: Header;
+  code: Buffer;
+
+  constructor(header: Header, code: Buffer) {
+    this.header = header;
+    this.code = code;
+  }
+
+  toBuffer(): Buffer {
+    return encode([
+      this.header.toBuffer(),
+      this.code,
+    ]);
+  }
+
+  static fromBuffer(data: Buffer): Contract {
+    const decoded = decode(data) as RecursiveBuffer;
+    return new Contract(Header.fromBuffer(decoded[0] as Buffer), decoded[1] as Buffer);
   }
 }

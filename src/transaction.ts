@@ -17,14 +17,13 @@ export interface TransactionJSON {
 
 export default class Transaction {
   // signer
-  private from: Account;
-  private nonce: BN;
-  private signature: Buffer | null;
-
-  private data: Buffer;
-  private to: Account | null;
-  private gasLimit: BN;
-  private gasPrice: BN;
+  from: Account;
+  nonce: BN;
+  signature: Buffer | null; 
+  data: Buffer;
+  to: Account | null;
+  gasLimit: BN;
+  gasPrice: BN;
   
   constructor(params: { 
       from: Account;
@@ -43,69 +42,41 @@ export default class Transaction {
     this.gasPrice = new BN(params.gasPrice);
     this.signature = null;
     if (params.signature) {
-      this.setSignature(params.signature);
+      this.sign(params.signature);
     }
   }
 
-  serialize(includeSignature = true): Buffer {
+  toBuffer(includeSignature = true): Buffer {
     const signer = [
-      this.from.getPublicKey(),
+      this.from.publicKey,
       this.nonce,
       includeSignature && this.signature ? this.signature : null,
     ];
     return encode([
       signer,
       this.data,
-      this.to ? this.to.getAddress() : NULL_ADDRESS,
+      this.to ? this.to.address : NULL_ADDRESS,
       this.gasLimit,
       this.gasPrice,
     ]);
   }
 
-  getSignatureHash(): Buffer {
+  get signatureHash(): Buffer {
     const hash = createHash('blake2b', { digestLength: SIGNATURE_HASH_LENGTH });
-    hash.update(this.serialize(false));
+    hash.update(this.toBuffer(false));
     return hash.digest();
   }
 
-  sign(): Buffer {
-    this.signature = this.from.sign(this.getSignatureHash());
-    return this.signature;
-  }
-
-  getFrom(): Account {
-    return this.from;
-  }
-
-  getTo(): Account | null {
-    return this.to;
-  }
-
-  getNonce(): BN {
-    return this.nonce;
-  }
-
-  getSignature(): Buffer | null {
-    return this.signature;
-  }
-
-  getData(): Buffer {
-    return this.data;
-  }
-
-  getGasLimit(): BN {
-    return this.gasLimit;
-  }
-
-  getGasPrice(): BN {
-    return this.gasPrice;
-  }
-
-  setSignature(signture: Buffer): void {
-    if (!this.from.verify(this.getSignatureHash(), signture)) {
-      throw Error('Invalid signature');
+  sign(signature?: Buffer): Buffer {
+    if (signature) {
+      if (!this.from.verify(this.signatureHash, signature)) {
+        throw Error('Invalid signature');
+      }
+      this.signature = signature;
+    } else {
+      this.signature = this.from.sign(this.signatureHash);
     }
-    this.signature = signture;
+    return this.signature;
   }
 
   toJSON(): TransactionJSON {
@@ -120,7 +91,7 @@ export default class Transaction {
     }
   }
 
-  static deserialize(data: Buffer): Transaction {
+  static fromBuffer(data: Buffer): Transaction {
     const decoded = decode(data) as RecursiveBuffer;
     const signer = decoded[0] as Buffer[];
     const tx = decoded as Buffer[];

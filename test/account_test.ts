@@ -9,16 +9,16 @@ describe('Account', function () {
     context('valid public key', function () {
       it('should return account', function () {
         const a = new Account(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex'));
-        a.getPublicKey().compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
-        a.hasPrivateKey().should.be.false;
+        a.publicKey.compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
+        a.hasPrivateKey.should.be.false;
       });
     });
 
     context('valid private key', function () {
       it('should return account', function () {
         const a = new Account(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex'));
-        a.getPublicKey().compare(Buffer.from('cfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
-        a.getPrivateKey().compare(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
+        a.publicKey.compare(Buffer.from('cfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
+        a.privateKey.compare(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
       });
     });
 
@@ -35,8 +35,8 @@ describe('Account', function () {
     context('valid', function () {
       it('should return account', function () {
         const a = Account.fromString('LADSUJQLIKT4WBBLGLJ6Q36DEBJ6KFBQIIABD6B3ZWF7NIE4RIZURI53');
-        a.getPublicKey().compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
-        a.hasPrivateKey().should.be.false;
+        a.publicKey.compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
+        a.hasPrivateKey.should.be.false;
       });
     });
 
@@ -69,8 +69,8 @@ describe('Account', function () {
     context('valid', function () {
       it('should return account', function () {
         const a = Account.fromAddress(Buffer.from('58072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348a3bb', 'hex'));
-        a.getPublicKey().compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
-        a.hasPrivateKey().should.be.false;
+        a.publicKey.compare(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex')).should.equal(0);
+        a.hasPrivateKey.should.be.false;
       });
     });
 
@@ -87,8 +87,8 @@ describe('Account', function () {
     context('valid', function () {
       it('should return account', function () {
         const a = Account.fromSeed(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16d', 'hex'));
-        a.getPublicKey().compare(Buffer.from('cfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
-        a.getPrivateKey().compare(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
+        a.publicKey.compare(Buffer.from('cfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
+        a.privateKey.compare(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16dcfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe3', 'hex')).should.equal(0);
       });
     });
 
@@ -104,8 +104,8 @@ describe('Account', function () {
   describe('#generate', function () {
     it('should return account', function () {
       const a = Account.generate();
-      a.getPublicKey().length.should.equal(PUBLIC_KEY_LENGTH);
-      a.getPrivateKey().length.should.equal(PRIVATE_KEY_LENGTH);
+      a.publicKey.length.should.equal(PUBLIC_KEY_LENGTH);
+      a.privateKey.length.should.equal(PRIVATE_KEY_LENGTH);
     })
   });
 
@@ -119,7 +119,7 @@ describe('Account', function () {
   describe('#getAddress', function () {
     it('should return 35 bytes address', function () {
       const a = new Account(Buffer.from('072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348', 'hex'));
-      a.getAddress().compare(Buffer.from('58072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348a3bb', 'hex')).should.equal(0);
+      a.address.compare(Buffer.from('58072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348a3bb', 'hex')).should.equal(0);
     });
   });
 

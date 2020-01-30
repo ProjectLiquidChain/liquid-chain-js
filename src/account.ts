@@ -26,38 +26,38 @@ export default class Account {
   }
 
   toString(): string {
-    return base32.encode(this.getAddress());
+    return base32.encode(this.address);
   }
 
-  getAddress(): Buffer {
+  get address(): Buffer {
     const versionBuffer = Buffer.from([VERSION_BYTE_ACCOUNT]);
-    const payload = Buffer.concat([versionBuffer, this.getPublicKey()]);
+    const payload = Buffer.concat([versionBuffer, this.publicKey]);
     const checksum = calculateChecksum(payload);
     const unencoded = Buffer.concat([payload, checksum]);
     return unencoded;
   }
 
-  getPublicKey(): Buffer {
+  get publicKey(): Buffer {
     return this.key.slice(-PUBLIC_KEY_LENGTH);
   }
 
-  hasPrivateKey(): boolean {
+  get hasPrivateKey(): boolean {
     return this.key.length === PRIVATE_KEY_LENGTH;
   }
 
-  getPrivateKey(): Buffer {
-    if (!this.hasPrivateKey()) {
+  get privateKey(): Buffer {
+    if (!this.hasPrivateKey) {
       throw Error('Missing private key');
     }
     return this.key;
   }
 
   sign(message: Buffer): Buffer {
-    return Buffer.from(sign.detached(message, this.getPrivateKey()));
+    return Buffer.from(sign.detached(message, this.privateKey));
   }
 
   verify(message: Buffer, signature: Buffer): boolean {
-    return sign.detached.verify(message, signature, this.getPublicKey());
+    return sign.detached.verify(message, signature, this.publicKey);
   }
 
   static fromAddress(address: Buffer): Account {
