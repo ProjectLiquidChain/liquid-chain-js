@@ -1,7 +1,8 @@
 import Account from './account';
-import { NULL_ADDRESS, SIGNATURE_HASH_LENGTH } from './constants';
+import { NULL_ADDRESS, SIGNATURE_HASH_LENGTH, PUBLIC_KEY_LENGTH } from './constants';
 import { encode, decode } from 'rlp';
-import { createHash } from 'blake2';
+import blake2b from 'blake2';
+import crypto from 'crypto';
 import BN from 'bn.js';
 import { RecursiveBuffer } from './types';
 
@@ -45,6 +46,7 @@ export default class Transaction {
       this.sign(params.signature);
     }
   }
+  
 
   toBuffer(includeSignature = true): Buffer {
     const signer = [
@@ -62,9 +64,27 @@ export default class Transaction {
   }
 
   get signatureHash(): Buffer {
-    const hash = createHash('blake2b', { digestLength: SIGNATURE_HASH_LENGTH });
+    const hash = blake2b.createHash('blake2b', { digestLength: SIGNATURE_HASH_LENGTH });
     hash.update(this.toBuffer(false));
     return hash.digest();
+  }
+
+  get account(): Account {
+    const signer = encode([
+      this.from.publicKey,
+      this.nonce.isZero() ? 0 : this.nonce,
+      null,
+    ]);
+    const hash = blake2b.createHash('blake2b', { digestLength: PUBLIC_KEY_LENGTH });
+    hash.update(signer);
+    return new Account(hash.digest());
+  }
+
+  get hash(): string {
+    // Tendermint hash
+    const hash = crypto.createHash('sha256');
+    hash.update(this.toBuffer());
+    return hash.digest().toString('hex');
   }
 
   sign(signature?: Buffer): Buffer {

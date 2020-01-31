@@ -1,6 +1,9 @@
 import { should, expect } from 'chai';
 import Transaction from '../src/transaction';
 import Account from '../src/account';
+import { Header } from '../src/abi';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 should();
 
@@ -273,6 +276,35 @@ describe('Transaction', function () {
         tx.gasPrice.cmpn(456).should.equal(0);
         tx.gasLimit.cmpn(100000).should.equal(0);
       });
+    });
+  });
+
+  describe('#getAccount', function () {
+    it('should return contract address', function () {
+      const tx = new Transaction({
+        from: Account.fromSeed(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16d', 'hex')),
+        nonce: 0,
+        data: Buffer.from('hello world'),
+        gasPrice: 1,
+        gasLimit: 0,
+      });
+      tx.account.toString().should.equal('LD5XLQKZN5UJVLGKQNFDWQSMPACCS4TPFGJI5HI75TCMSLI4TTT7DXYP');
+    });
+  });
+
+  describe('#getHash', function () {
+    it('should return contract address', function () {
+      const header = Header.fromJSON(JSON.parse(readFileSync(join(__dirname, 'token-abi.json'), 'utf-8')));
+      const tx = new Transaction({
+        from: Account.fromSeed(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16d', 'hex')),
+        to: Account.fromString('LD5XLQKZN5UJVLGKQNFDWQSMPACCS4TPFGJI5HI75TCMSLI4TTT7DXYP'),
+        nonce: 0,
+        data: header.functions[2].encode(['123456']),
+        gasPrice: 1,
+        gasLimit: 0,
+      });
+      tx.sign();
+      tx.hash.should.equal('c6079fdcd1646302811f410f0ebbdd29fc064c9815ffe84ac21d9b01e46852c5');
     });
   });
 });
