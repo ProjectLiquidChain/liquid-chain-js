@@ -52,8 +52,8 @@ export default class Client {
     if (data instanceof Transaction) {
       data = data.toBuffer();
     }
-    const { hash } = await this.request<BroadcastRequest, BroadcastResponse>('broadcast', {
-      rawTx: typeof data === 'string' ? data :  data.toString('hex'),
+    const { hash } = await this.request<BroadcastRequest, BroadcastResponse>('chain.Broadcast', {
+      rawTx: typeof data === 'string' ? data :  data.toString('base64'),
     });
     return hash;
   }

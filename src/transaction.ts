@@ -49,14 +49,14 @@ export default class Transaction {
   toBuffer(includeSignature = true): Buffer {
     const signer = [
       this.from.publicKey,
-      this.nonce,
+      this.nonce.isZero() ? 0 : this.nonce,
       includeSignature && this.signature ? this.signature : null,
     ];
     return encode([
       signer,
       this.data,
       this.to ? this.to.address : NULL_ADDRESS,
-      this.gasLimit,
+      this.gasLimit.isZero() ? 0 : this.gasLimit,
       this.gasPrice,
     ]);
   }
