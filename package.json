@@ -1,13 +1,12 @@
 {
   "name": "liquid-chain",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Liquid Chain JS SDK",
   "repository": "git@github.com:QuoineFinancial/liquid-chain-js.git",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "postinstall": "tsc",
     "lint": "eslint ./src/**/*.ts",
     "test": "mocha",
     "coverage": "nyc mocha"
