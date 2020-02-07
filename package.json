@@ -1,6 +1,6 @@
 {
   "name": "liquid-chain",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Liquid Chain JS SDK",
   "repository": "git@github.com:QuoineFinancial/liquid-chain-js.git",
   "main": "dist/index.js",
@@ -39,6 +39,7 @@
     "blake2": "^4.0.0",
     "bn.js": "^5.1.1",
     "crc": "^3.8.0",
+    "int64-buffer": "^0.99.1007",
     "rlp": "^2.2.4",
     "tweetnacl": "^1.0.1"
   }

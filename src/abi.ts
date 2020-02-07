@@ -2,6 +2,7 @@
 import { encode, decode } from 'rlp';
 import Account from './account';
 import { RecursiveBuffer } from './types';
+import { Uint64LE, Int64LE } from 'int64-buffer';
 
 export enum PrimitiveType {
   Uint8,
@@ -78,8 +79,7 @@ export class Parameter {
         ret.writeUInt32LE(parseInt(value), 0);
         break;
       case PrimitiveType.Uint64:
-        ret = Buffer.alloc(8);
-        ret.writeBigUInt64LE(BigInt(value), 0);
+        ret = new Uint64LE(value, 10).toBuffer();
         break;
       case PrimitiveType.Int8:
         ret = Buffer.alloc(1);
@@ -94,8 +94,7 @@ export class Parameter {
         ret.writeInt32LE(parseInt(value), 0);
         break;
       case PrimitiveType.Int64:
-        ret = Buffer.alloc(8);
-        ret.writeBigInt64LE(BigInt(value), 0);
+        ret = new Int64LE(value, 10).toBuffer();
         break;
       case PrimitiveType.Float32:
         ret = Buffer.alloc(4);
