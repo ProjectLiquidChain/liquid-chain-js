@@ -80,7 +80,7 @@ export default class Account {
   }
 
   static fromString(encoded: string): Account {
-    return Account.fromAddress(base32.decode(encoded));
+    return Account.fromAddress(Buffer.from(base32.decode(encoded)));
   }
   
   static fromSeed(seed: Buffer): Account {
