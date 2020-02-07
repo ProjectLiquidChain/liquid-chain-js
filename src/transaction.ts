@@ -1,10 +1,12 @@
 import Account from './account';
 import { NULL_ADDRESS, SIGNATURE_HASH_LENGTH, PUBLIC_KEY_LENGTH } from './constants';
 import { encode, decode } from 'rlp';
-import blake2b from 'blake2';
 import crypto from 'crypto';
 import BN from 'bn.js';
 import { RecursiveBuffer } from './types';
+// blakejs do not have type defination
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { blake2b } = require('blakejs');
 
 export interface TransactionJSON {
   from: string;
@@ -64,9 +66,7 @@ export default class Transaction {
   }
 
   get signatureHash(): Buffer {
-    const hash = blake2b.createHash('blake2b', { digestLength: SIGNATURE_HASH_LENGTH });
-    hash.update(this.toBuffer(false));
-    return hash.digest();
+    return Buffer.from(blake2b(this.toBuffer(false), null, SIGNATURE_HASH_LENGTH));
   }
 
   get account(): Account {
@@ -75,9 +75,7 @@ export default class Transaction {
       this.nonce.isZero() ? 0 : this.nonce,
       null,
     ]);
-    const hash = blake2b.createHash('blake2b', { digestLength: PUBLIC_KEY_LENGTH });
-    hash.update(signer);
-    return new Account(hash.digest());
+    return new Account(Buffer.from(blake2b(signer, null, PUBLIC_KEY_LENGTH)));
   }
 
   get hash(): string {

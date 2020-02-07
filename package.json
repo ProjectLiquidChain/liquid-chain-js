@@ -15,7 +15,6 @@
   "license": "MIT",
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
-    "@types/blake2": "^4.0.0",
     "@types/bn.js": "^4.11.6",
     "@types/chai": "^4.2.7",
     "@types/crc": "^3.4.0",
@@ -36,7 +35,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "base32.js": "^0.1.0",
-    "blake2": "^4.0.0",
+    "blakejs": "^1.1.0",
     "bn.js": "^5.1.1",
     "crc": "^3.8.0",
     "int64-buffer": "^0.99.1007",
