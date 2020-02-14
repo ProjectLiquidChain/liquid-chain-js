@@ -28,11 +28,11 @@ export interface GetAccountRequest {
 export interface GetAccountResponse {
   account: {
     nonce: string;
-  };
-  contractHash?: string;
-  contract?: {
-    header: HeaderJSON;
-    code: string;
+    contractHash?: string;
+    contract?: {
+      header: HeaderJSON;
+      code: string;
+    };
   };
 }
 
