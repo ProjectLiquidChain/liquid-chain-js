@@ -1,5 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import Transaction from './transaction';
+import Account from './account';
+import { EventJSON } from './abi';
 
 export interface JsonRpcResponse<T> {
   jsonrpc: string;
@@ -17,6 +19,28 @@ export interface BroadcastRequest {
 
 export interface BroadcastResponse {
   hash: string;
+}
+
+export interface GetAccountRequest {
+  address: string;
+}
+
+export interface GetAccountResponse {
+  account: {
+    nonce: string;
+  };
+}
+
+export interface CallRequest {
+  address: string;
+  method: string;
+  args: string[];
+  height?: number;
+}
+
+export interface CallResponse {
+  value: number;
+  events: EventJSON[];
 }
 
 export default class Client {
@@ -48,13 +72,34 @@ export default class Client {
     return data.result;
   }
 
-  async broadcast(data: string | Buffer | Transaction): Promise<string> {
+  async broadcast(data: string | Buffer | Transaction): Promise<BroadcastResponse> {
     if (data instanceof Transaction) {
       data = data.toBuffer();
     }
-    const { hash } = await this.request<BroadcastRequest, BroadcastResponse>('chain.Broadcast', {
+    return this.request<BroadcastRequest, BroadcastResponse>('chain.Broadcast', {
       rawTx: typeof data === 'string' ? data :  data.toString('base64'),
     });
-    return hash;
+  }
+
+  async getAccount(address: string | Account): Promise<GetAccountResponse> {
+    if (address instanceof Account) {
+      address = address.toString();
+    }
+    return this.request<GetAccountRequest, GetAccountResponse>('storage.GetAccount', {
+      address,
+    });
+  }
+
+
+  async call(address: string | Account, method: string, args: string[], height?: number): Promise<CallResponse> {
+    if (address instanceof Account) {
+      address = address.toString();
+    }
+    return this.request<CallRequest, CallResponse>('storage.Call', {
+      address,
+      method,
+      args,
+      height: height || 0,
+    });
   }
 }
