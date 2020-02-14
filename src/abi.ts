@@ -200,8 +200,8 @@ export class Event extends Function {
 
 export interface HeaderJSON {
   version: number;
-  functions: FunctionJSON[];
-  events: EventJSON[];
+  functions: FunctionJSON[] | {[key: string]: FunctionJSON};
+  events: EventJSON[] | { [key: string]: FunctionJSON };
 }
 
 export class Header {
@@ -252,8 +252,10 @@ export class Header {
   static fromJSON(json: HeaderJSON): Header {
     return new Header(
       json.version,
-      json.functions.map(f => Function.fromJSON(f)),
-      json.events.map(e => Event.fromJSON(e)),
+      ((json.functions.map ? json.functions : Object.values(json.functions)) as FunctionJSON[])
+        .map(f => Function.fromJSON(f)),
+      ((json.events.map ? json.events : Object.values(json.events)) as EventJSON[])
+        .map(e => Event.fromJSON(e)),
     );
   }
 }
