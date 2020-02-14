@@ -21,7 +21,7 @@ export enum PrimitiveType {
 export interface ParameterJSON {
   name: string;
   is_array: boolean;
-  type: string;
+  type: string | PrimitiveType;
   size: number;
 }
 
@@ -122,11 +122,16 @@ export class Parameter {
   }
 
   static fromJSON(json: ParameterJSON): Parameter {
-    const typeName = (json.type.charAt(0).toUpperCase() + json.type.slice(1));
+    const typeName = typeof json.type === 'string'
+      ? (json.type.charAt(0).toUpperCase() + json.type.slice(1))
+      : null;
+    const type = typeName
+      ? PrimitiveType[typeName as keyof typeof PrimitiveType]
+      : json.type as PrimitiveType; 
     return new Parameter(
       json.name,
       json.is_array,
-      PrimitiveType[typeName as keyof typeof PrimitiveType],
+      type,
       json.size,
     );
   }

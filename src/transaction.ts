@@ -48,7 +48,6 @@ export default class Transaction {
       this.sign(params.signature);
     }
   }
-  
 
   toBuffer(includeSignature = true): Buffer {
     const signer = [
