@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import Transaction from './transaction';
 import Account from './account';
-import { EventJSON } from './abi';
+import { EventJSON, HeaderJSON } from './abi';
 
 export interface JsonRpcResponse<T> {
   jsonrpc: string;
@@ -28,6 +28,11 @@ export interface GetAccountRequest {
 export interface GetAccountResponse {
   account: {
     nonce: string;
+  };
+  contractHash?: string;
+  contract?: {
+    header: HeaderJSON;
+    code: string;
   };
 }
 
