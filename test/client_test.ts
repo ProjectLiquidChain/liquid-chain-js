@@ -72,6 +72,58 @@ describe('Client', function () {
     });
   });
 
+  describe('getTransction', function () {
+    context('valid request', function () {
+      it('should return transction', async function () {
+        const client = new Client(NODE_URL);
+        const mock = new Mock(client.client);
+        mock.onPost(NODE_URL).reply(200, {
+          result: {
+            tx:
+            {
+              block:
+              {
+                hash: '2E72BF7684741EBF8E7F92FB9CF5015B5831A2CDA88008A4D943B945AE0146EE',
+                time: '2020-02-17T07:34:55.071446Z',
+                height: 5,
+                appHash: '5DB646939A07C3C3E75C4B46211634FC173A5DCC323B95B2487BA1C3DFEAFF48',
+                consensusHash: '048091BC7DDC283F77BFBF91D73C44DA58C3DF8A9CBC867405D8B7F3DAADA22F',
+                previousBlockHash: 'CDA4CF18FF612887AE076F5CEA4298F453052012B48C7376DB6A9C1579B81E95',
+                txHashes: [Array]
+              },
+              hash: '4AB686CCBA3F567714F811CA7572BFC77D0963D86478E9A8E6947AAFA80B6049',
+              nonce: 1,
+              code: 0,
+              data: '',
+              info: 'ok',
+              contract: '',
+              from: 'LDH4MEPOJX3EGN3BLBTLEYXVHYCN3AVA7IOE772F3XGI6VNZHAP6GX5R',
+              to: 'LD5XLQKZN5UJVLGKQNFDWQSMPACCS4TPFGJI5HI75TCMSLI4TTT7DXYP',
+              gasUsed: 0,
+              gasLimit: 0,
+              result: 0,
+              events: [
+                {
+                  name: 'Create',
+                  contract: 'LD5XLQKZN5UJVLGKQNFDWQSMPACCS4TPFGJI5HI75TCMSLI4TTT7DXYP',
+                  attributes:
+                    [{ key: 'id', type: 'uint64', value: '0100000000000000' },
+                    {
+                      key: 'player',
+                      type: 'address',
+                      value: '58cfc611ee4df64337615866b262f53e04dd82a0fa1c4fff45ddcc8f55b9381fe35fb1'
+                    }]
+                }
+              ]
+            }
+          },
+        });
+        const res = await client.getTransaction('4AB686CCBA3F567714F811CA7572BFC77D0963D86478E9A8E6947AAFA80B6049');
+        res.tx.hash.should.equal('4AB686CCBA3F567714F811CA7572BFC77D0963D86478E9A8E6947AAFA80B6049');
+      });
+    });
+  });
+
   describe('call', function () {
     context('valid request', function () {
       it('should return value', async function () {

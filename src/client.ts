@@ -36,6 +36,45 @@ export interface GetAccountResponse {
   };
 }
 
+export interface GetTransactionRequest {
+  hash: string;
+}
+
+export interface Block {
+  hash: string;
+  time: string;
+  height: number;
+}
+
+export interface TransctionEventAttribute {
+  key: string;
+  type: string;
+  value: string;
+}
+
+export interface TransctionEvent {
+  name: string;
+  contract: string;
+  attributes: TransctionEventAttribute[];
+}
+
+export interface GetTransactionResponse {
+  tx: {
+    hash: string;
+    block: Block;
+    result: number;
+    from: string;
+    to: string;
+    contract: string;
+    info: string;
+    gasUsed: number;
+    gasLimit: number;
+    gasPrice: number;
+    nonce: number;
+    events: TransctionEvent[];
+  };
+}
+
 export interface CallRequest {
   address: string;
   method: string;
@@ -95,6 +134,11 @@ export default class Client {
     });
   }
 
+  async getTransaction(hash: string): Promise<GetTransactionResponse> {
+    return this.request<GetTransactionRequest, GetTransactionResponse>('chain.GetTx', {
+      hash,
+    });
+  }
 
   async call(address: string | Account, method: string, args: string[], height?: number): Promise<CallResponse> {
     if (address instanceof Account) {

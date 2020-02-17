@@ -1,7 +1,7 @@
 
 import { encode, decode } from 'rlp';
 import Account from './account';
-import { RecursiveBuffer, Recursive } from './types';
+import { RecursiveBuffer } from './types';
 import { Uint64LE, Int64LE } from 'int64-buffer';
 
 export enum PrimitiveType {
