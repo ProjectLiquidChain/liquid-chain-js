@@ -1,7 +1,7 @@
 
 import { encode, decode } from 'rlp';
 import Account from './account';
-import { RecursiveBuffer } from './types';
+import { RecursiveBuffer, Recursive } from './types';
 import { Uint64LE, Int64LE } from 'int64-buffer';
 
 export enum PrimitiveType {
@@ -107,8 +107,43 @@ export class Parameter {
       case PrimitiveType.Address:
         ret = Account.fromString(value).address;
         break;
+      default:
+        throw Error('Encoder not found');
     }
     return ret;
+  }
+
+  decode(raw: Buffer | Buffer[]): string | string[] {
+    if (this.isArray && Array.isArray(raw)) {
+      return raw.map(d => this.decode(d) as string);
+    }
+    const data = raw as Buffer;
+    switch (this.type) {
+      case PrimitiveType.Uint8:
+        return data.readUInt8(0).toString();
+      case PrimitiveType.Int8:
+        return data.readInt8(0).toString();
+      case PrimitiveType.Uint16:
+        return data.readUInt16LE(0).toString();
+      case PrimitiveType.Int16:
+        return data.readInt16LE(0).toString();
+      case PrimitiveType.Uint32:
+        return data.readUInt32LE(0).toString();
+      case PrimitiveType.Int32:
+        return data.readInt32LE(0).toString();
+      case PrimitiveType.Uint64:
+        return new Uint64LE(data).toString();
+      case PrimitiveType.Int64:
+        return new Int64LE(data).toString();
+      case PrimitiveType.Float32:
+        return data.readFloatLE(0).toString();
+      case PrimitiveType.Float64:
+        return data.readDoubleLE(0).toString();
+      case PrimitiveType.Address:
+        return Account.fromAddress(data).toString();
+      default:
+        throw Error('Decoder not found');
+    }
   }
 
   static fromBuffer(decoded: RecursiveBuffer): Parameter {
@@ -176,6 +211,14 @@ export class Function {
       this.name,
       encode(values.map((v, i) => this.parameters[i].encode(v))),
     ]);
+  }
+
+  decode(raw: Buffer): (string | string[])[] {
+    const decoded = decode(raw) as RecursiveBuffer;
+    if (this.name !== (decoded[0] as Buffer).toString()) {
+      throw Error('Function name mismatch');
+    }
+    return (decode(decoded[1]) as Buffer[]).map((d, i) => this.parameters[i].decode(d));
   }
 
   static fromBuffer(decoded: RecursiveBuffer): Function {
