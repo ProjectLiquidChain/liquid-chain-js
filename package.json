@@ -1,6 +1,6 @@
 {
   "name": "liquid-chain",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Liquid Chain JS SDK",
   "repository": "git@github.com:QuoineFinancial/liquid-chain-js.git",
   "main": "dist/index.js",
@@ -15,7 +15,6 @@
   "license": "MIT",
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
-    "@types/bn.js": "^4.11.6",
     "@types/chai": "^4.2.7",
     "@types/crc": "^3.4.0",
     "@types/mocha": "^5.2.7",
@@ -33,6 +32,7 @@
     "typescript": "^3.7.4"
   },
   "dependencies": {
+    "@types/bn.js": "^4.11.6",
     "axios": "^0.19.2",
     "base32.js": "^0.1.0",
     "blakejs": "^1.1.0",

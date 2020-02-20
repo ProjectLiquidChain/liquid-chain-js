@@ -30,11 +30,11 @@ export default class Transaction {
   
   constructor(params: { 
       from: Account;
-      nonce: number | string;
+      nonce: number | string | BN;
       to?: Account | null;
       data: Buffer;
-      gasLimit: number | string;
-      gasPrice: number | string;
+      gasLimit: number | string | BN;
+      gasPrice: number | string | BN;
       signature?: Buffer | null;
     }) {
     this.from = params.from;
@@ -114,12 +114,12 @@ export default class Transaction {
     const tx = decoded as Buffer[];
     return new Transaction({
       from: new Account(signer[0]),
-      nonce: new BN(signer[1]).toString(),
+      nonce: new BN(signer[1]),
       signature: signer[2].length > 0 ? signer[2] : null,
       data: tx[1],
       to: tx[2].length > 0 && NULL_ADDRESS.compare(tx[2]) !== 0 ? Account.fromAddress(tx[2]) : null,
-      gasLimit: new BN(tx[3]).toString(),
-      gasPrice: new BN(tx[4]).toString(),
+      gasLimit: new BN(tx[3]),
+      gasPrice: new BN(tx[4]),
     });
   }
 }
