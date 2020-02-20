@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import Transaction from './transaction';
 import Account from './account';
-import { EventJSON, HeaderJSON } from './abi';
+import { HeaderJSON } from './abi';
 
 export interface JsonRpcResponse<T> {
   jsonrpc: string;
@@ -84,7 +84,7 @@ export interface CallRequest {
 
 export interface CallResponse {
   value: number;
-  events: EventJSON[];
+  events: TransctionEvent[];
 }
 
 export default class Client {

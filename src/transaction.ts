@@ -60,7 +60,7 @@ export default class Transaction {
       this.data,
       this.to ? this.to.address : NULL_ADDRESS,
       this.gasLimit.isZero() ? 0 : this.gasLimit,
-      this.gasPrice,
+      this.gasPrice.isZero() ? 0 : this.gasPrice,
     ]);
   }
 
