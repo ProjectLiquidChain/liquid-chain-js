@@ -19,6 +19,8 @@ export interface BroadcastRequest {
 
 export interface BroadcastResponse {
   hash: string;
+  code: number;
+  log: string;
 }
 
 export interface GetAccountRequest {
@@ -120,9 +122,13 @@ export default class Client {
     if (data instanceof Transaction) {
       data = data.toBuffer();
     }
-    return this.request<BroadcastRequest, BroadcastResponse>('chain.Broadcast', {
+    const res = await this.request<BroadcastRequest, BroadcastResponse>('chain.Broadcast', {
       rawTx: typeof data === 'string' ? data :  data.toString('base64'),
     });
+    if (res.code !== 0) {
+      throw Error(res.log);
+    }
+    return res;
   }
 
   async getAccount(address: string | Account): Promise<GetAccountResponse> {
