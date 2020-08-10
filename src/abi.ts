@@ -61,7 +61,7 @@ export class Parameter {
 
   encode(values: string | string[]): Buffer | Buffer[] {
     if (this.isArray && Array.isArray(values)) {
-      return values.map(v => this.encode(v) as Buffer);
+      return values.reduce((a, v) => Buffer.concat([a, this.encode(v) as Buffer]), Buffer.alloc(0));
     }
     let ret: Buffer;
     const value = values as string;
@@ -111,39 +111,6 @@ export class Parameter {
         throw Error('Encoder not found');
     }
     return ret;
-  }
-
-  decode(raw: Buffer | Buffer[]): string | string[] {
-    if (this.isArray && Array.isArray(raw)) {
-      return raw.map(d => this.decode(d) as string);
-    }
-    const data = raw as Buffer;
-    switch (this.type) {
-      case PrimitiveType.Uint8:
-        return data.readUInt8(0).toString();
-      case PrimitiveType.Int8:
-        return data.readInt8(0).toString();
-      case PrimitiveType.Uint16:
-        return data.readUInt16LE(0).toString();
-      case PrimitiveType.Int16:
-        return data.readInt16LE(0).toString();
-      case PrimitiveType.Uint32:
-        return data.readUInt32LE(0).toString();
-      case PrimitiveType.Int32:
-        return data.readInt32LE(0).toString();
-      case PrimitiveType.Uint64:
-        return new Uint64LE(data).toString();
-      case PrimitiveType.Int64:
-        return new Int64LE(data).toString();
-      case PrimitiveType.Float32:
-        return data.readFloatLE(0).toString();
-      case PrimitiveType.Float64:
-        return data.readDoubleLE(0).toString();
-      case PrimitiveType.Address:
-        return Account.fromAddress(data).toString();
-      default:
-        throw Error('Decoder not found');
-    }
   }
 
   static fromBuffer(decoded: RecursiveBuffer): Parameter {
@@ -208,17 +175,10 @@ export class Function {
 
   encode(values: (string | string[])[]): Buffer {
     return encode([
+      Buffer.alloc(0),
       this.name,
       encode(values.map((v, i) => this.parameters[i].encode(v))),
     ]);
-  }
-
-  decode(raw: Buffer): (string | string[])[] {
-    const decoded = decode(raw) as RecursiveBuffer;
-    if (this.name !== (decoded[0] as Buffer).toString()) {
-      throw Error('Function name mismatch');
-    }
-    return (decode(decoded[1]) as Buffer[]).map((d, i) => this.parameters[i].decode(d));
   }
 
   static fromBuffer(decoded: RecursiveBuffer): Function {
@@ -322,6 +282,14 @@ export class Contract {
       this.header.toBuffer(),
       this.code,
     ]);
+  }
+
+  encode(invocationData?: Buffer): Buffer {
+    if (invocationData) {
+      const decoded = decode(invocationData) as RecursiveBuffer;
+      return encode([this.toBuffer(), decoded[1] as Buffer, decoded[2] as Buffer]);
+    }
+    return encode([this.toBuffer(), '', Buffer.alloc(0)]);
   }
 
   static fromBuffer(data: Buffer): Contract {

@@ -304,7 +304,7 @@ describe('Transaction', function () {
         gasLimit: 0,
       });
       tx.sign();
-      tx.hash.should.equal('c6079fdcd1646302811f410f0ebbdd29fc064c9815ffe84ac21d9b01e46852c5');
+      tx.hash.should.equal('04361eec2d43664bf8a86c5788b4fb2bfdf7e8b0e32479b7b6c028a275a66745');
     });
   });
 });

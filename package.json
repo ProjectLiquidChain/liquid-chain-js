@@ -1,6 +1,6 @@
 {
   "name": "liquid-chain",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Liquid Chain JS SDK",
   "repository": "git@github.com:QuoineFinancial/liquid-chain-js.git",
   "main": "dist/index.js",

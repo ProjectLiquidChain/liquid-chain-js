@@ -16,6 +16,7 @@ describe('Client', function () {
         const mock = new Mock(client.client);
         mock.onPost(NODE_URL).reply(200, {
           result: {
+            code: 0,
             hash: 'abc123',
           },
         });
