@@ -1,6 +1,7 @@
 import { should } from 'chai';
 import Account from '../src/account';
 import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH } from '../src/constants';
+import { create } from 'domain';
 
 should();
 
@@ -176,6 +177,23 @@ describe('Account', function () {
         const a = new Account(publicKey);
         const data = Buffer.from('hello world', 'utf8');
         a.verify(data, signature).should.be.false;
+      });
+    });
+  });
+  
+  describe('#create', function () {
+    context('nonce 0', function () {
+      it('should return generate address', function () {
+        Account.fromSeed(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16d', 'hex'))
+          .create(0)
+          .toString().should.equal('LB36YY2JHKXFXSESE75QIB5KWTOPFJ5G4267PJWLPY4WDLHGCBRRJWLS');
+      });
+    });
+    context('nonce 1', function () {
+      it('should return generate address', function () {
+        Account.fromSeed(Buffer.from('b66311a8a3401fe772615c610bb6d4add13d373289f6841ed3dc87ac2ec0b16d', 'hex'))
+          .create(1)
+          .toString().should.equal('LCPML46ZM36URNZZYESDE5KSBP44L7MPXJMK2WBHGXITKB6LWUCSAQGR');
       });
     });
   });

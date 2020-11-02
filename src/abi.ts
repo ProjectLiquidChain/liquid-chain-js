@@ -3,6 +3,10 @@ import { encode, decode } from 'rlp';
 import Account from './account';
 import { RecursiveBuffer } from './types';
 import { Uint64LE, Int64LE } from 'int64-buffer';
+import { HASH_LENGTH, METHOD_ID_LENGTH, NULL_METHOD_ID, INIT_FUNCTION_NAME, ARRAY_SUFFIX } from './constants';
+// blakejs do not have type defination
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { blake2b } = require('blakejs');
 
 export enum PrimitiveType {
   Uint8,
@@ -20,24 +24,20 @@ export enum PrimitiveType {
 
 export interface ParameterJSON {
   name: string;
-  is_array: boolean;
-  type: string | PrimitiveType;
-  size: number;
+  type: string;
 }
 
-export type ParameterArray = [string, number, number, number];
+export type ParameterArray = [string, number, number];
 
 export class Parameter {
   name: string;
   isArray: boolean;
   type: PrimitiveType;
-  size: number;
 
-  constructor(name: string, isArray: boolean, type: PrimitiveType, size: number) {
+  constructor(name: string, isArray: boolean, type: PrimitiveType) {
     this.name = name;
     this.isArray = isArray;
     this.type = type;
-    this.size = size;
   }
 
   toArray(): ParameterArray {
@@ -45,17 +45,13 @@ export class Parameter {
       this.name,
       this.isArray ? 1 : 0,
       this.type,
-      this.size,
     ];
   }
 
   toJSON(): ParameterJSON {
     return {
       name: this.name,
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      is_array: this.isArray,
-      type: PrimitiveType[this.type].toLowerCase(),
-      size: this.size,
+      type: PrimitiveType[this.type].toLowerCase() + (this.isArray ? ARRAY_SUFFIX : ''),
     };
   }
 
@@ -119,22 +115,17 @@ export class Parameter {
       data[0].toString(),
       data[1].length > 0 ? true : false,
       parseInt(`0x${data[2].toString('hex')}`),
-      data[3].length > 0 ? parseInt(`0x${data[3].toString('hex')}`) : 0,
     );
   }
 
   static fromJSON(json: ParameterJSON): Parameter {
-    const typeName = typeof json.type === 'string'
-      ? (json.type.charAt(0).toUpperCase() + json.type.slice(1))
-      : null;
-    const type = typeName
-      ? PrimitiveType[typeName as keyof typeof PrimitiveType]
-      : json.type as PrimitiveType; 
+    const isArray = json.type.endsWith(ARRAY_SUFFIX);
+    const typeName = isArray ? json.type.slice(0, json.type.length - ARRAY_SUFFIX.length) : json.type;
+    const type = PrimitiveType[(typeName.charAt(0).toUpperCase() + typeName.slice(1)) as keyof typeof PrimitiveType];
     return new Parameter(
       json.name,
-      json.is_array,
+      isArray,
       type,
-      json.size,
     );
   }
 }
@@ -173,12 +164,16 @@ export class Function {
     }
   }
 
-  encode(values: (string | string[])[]): Buffer {
-    return encode([
-      Buffer.alloc(0),
-      this.name,
-      encode(values.map((v, i) => this.parameters[i].encode(v))),
-    ]);
+  get methodId(): Buffer {
+    return Buffer.from(blake2b(Buffer.from(this.name), null, HASH_LENGTH)).slice(0, METHOD_ID_LENGTH);
+  }
+
+  encode(args: (string | string[])[]): (Buffer | null)[] {
+    return [
+      this.methodId,
+      encode(args.map((v, i) => this.parameters[i].encode(v))),
+      null,
+    ];
   }
 
   static fromBuffer(decoded: RecursiveBuffer): Function {
@@ -221,29 +216,27 @@ export class Header {
     this.version = version;
     this.functions = functions;
     this.events = events;
-    // sort by name
-    this.events.sort((e1, e2) => {
-      return e1.name.localeCompare(e2.name);
-    });
-    this.functions.sort((e1, e2) => {
-      return e1.name.localeCompare(e2.name);
-    });
   }
 
   toBuffer(): Buffer {
     return encode([
       this.version,
-      this.functions.map(f => f.toArray()),
-      this.events.map(e => e.toArray()),
+      // Sort for consistent with go implementation, not relate to consenseus
+      [...this.functions].sort((a, b) => a.methodId.compare(b.methodId)).map(f => f.toArray()),
+      [...this.events].sort((a, b) => a.methodId.compare(b.methodId)).map(e => e.toArray()),
     ]);
   }
 
   toJSON(): HeaderJSON {
     return {
       version: this.version,
-      functions: this.functions.map(f => f.toJSON()).sort(),
+      functions: this.functions.map(f => f.toJSON()),
       events: this.events.map(e => e.toJSON()),
     }
+  }
+
+  getFunction(name: string): Function {
+    return this.functions.find(f => f.name === name)!;
   }
 
   static fromBuffer(data: Buffer): Header {
@@ -260,10 +253,8 @@ export class Header {
   static fromJSON(json: HeaderJSON): Header {
     return new Header(
       json.version,
-      ((json.functions.map ? json.functions : Object.values(json.functions)) as FunctionJSON[])
-        .map(f => Function.fromJSON(f)),
-      ((json.events.map ? json.events : Object.values(json.events)) as EventJSON[])
-        .map(e => Event.fromJSON(e)),
+      (json.functions as FunctionJSON[]).map(f => Function.fromJSON(f)),
+      (json.events as EventJSON[]).map(e => Event.fromJSON(e)),
     );
   }
 }
@@ -284,12 +275,12 @@ export class Contract {
     ]);
   }
 
-  encode(invocationData?: Buffer): Buffer {
-    if (invocationData) {
-      const decoded = decode(invocationData) as RecursiveBuffer;
-      return encode([this.toBuffer(), decoded[1] as Buffer, decoded[2] as Buffer]);
+  encode(args?: (string | string[])[]): (Buffer | null)[] {
+    if (args) {
+      const init = this.header.functions.find(f => f.name === INIT_FUNCTION_NAME)!.encode(args);
+      return [init[0], init[1], this.toBuffer()];
     }
-    return encode([this.toBuffer(), '', Buffer.alloc(0)]);
+    return [NULL_METHOD_ID, null, this.toBuffer()];
   }
 
   static fromBuffer(data: Buffer): Contract {

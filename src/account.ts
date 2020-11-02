@@ -1,9 +1,13 @@
 import { crc16xmodem } from 'crc';
 import { sign } from 'tweetnacl';
-import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH, VERSION_BYTE_ACCOUNT } from './constants';
+import { PUBLIC_KEY_LENGTH, PRIVATE_KEY_LENGTH, VERSION_BYTE_ACCOUNT, HASH_LENGTH } from './constants';
+import BN from 'bn.js';
+import { encode } from 'rlp';
 // base32 do not have type defination
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const base32 = require('base32.js');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { blake2b } = require('blakejs');
 
 function calculateChecksum(payload: Buffer): Buffer {
   const checksum = Buffer.alloc(2);
@@ -50,6 +54,15 @@ export default class Account {
       throw Error('Missing private key');
     }
     return this.key;
+  }
+
+  create(nonce: number | string | BN): Account {
+    const n = new BN(nonce);
+    const signer = encode([
+      this.address,
+      n.isZero() ? 0 : n,
+    ]);
+    return new Account(Buffer.from(blake2b(signer, null, HASH_LENGTH)));
   }
 
   sign(message: Buffer): Buffer {
