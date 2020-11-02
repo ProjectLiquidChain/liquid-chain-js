@@ -51,7 +51,7 @@ describe('Function', function () {
     it('should return encoded data', function () {
       const sampleJSON = JSON.parse(readFileSync(join(__dirname, 'parameters-abi.json'), 'utf-8'));
       const header = Header.fromJSON(sampleJSON);
-      const data = header.getFunction('test').encode(['1', '256', '65536', '4294967296', '-1', '-1', '-1', '-1', '1.0', '1.0', 'LADSUJQLIKT4WBBLGLJ6Q36DEBJ6KFBQIIABD6B3ZWF7NIE4RIZURI53', ['1', '2', '3']]);
+      const data = header.getFunction('test').encode(['1', '256', '65536', '4294967296', '-1', '-1', '-1', '-1', '1.0', '1.0', 'LADSUJQLIKT4WBBLGLJ6Q36DEBJ6KFBQIIABD6B3ZWF7NIE4RIZURI53', '[1,2,3]']);
       data[0]!.compare(Buffer.from('928b2036', 'hex')).should.equal(0);
       data[1]!.compare(Buffer.from('f85b01820001840000010088000000000100000081ff82ffff84ffffffff88ffffffffffffffff840000803f88000000000000f03fa358072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348a3bb83010203', 'hex')).should.equal(0);
       expect(data[2]).to.be.null;

@@ -30,11 +30,9 @@ export interface GetAccountRequest {
 export interface GetAccountResponse {
   account: {
     nonce: string;
-    contractHash?: string;
-    contract?: {
-      header: HeaderJSON;
-      code: string;
-    };
+    contractHash: string;
+    storageHash: string;
+    creator: string;
   };
 }
 
@@ -45,47 +43,75 @@ export interface GetTransactionRequest {
 export interface Block {
   hash: string;
   time: string;
+  height: string;
+  parent: string;
+  stateRoot: string;
+  transactionRoot: string;
+  receiptRoot: string;
+  transactions: TransactionData[];
+}
+
+export interface GetBlockByHeightRequest {
   height: number;
 }
 
+export interface GetBlockResponse {
+  block: Block;
+}
+
 export interface TransctionEventAttribute {
-  key: string;
+  name: string;
   type: string;
   value: string;
 }
 
 export interface TransctionEvent {
   name: string;
-  contract: string;
+  // contract: string;
   attributes: TransctionEventAttribute[];
 }
 
-export interface GetTransactionResponse {
-  tx: {
-    hash: string;
-    block: Block;
-    result: number;
-    from: string;
-    to: string;
-    contract: string;
-    info: string;
-    gasUsed: number;
-    gasLimit: number;
-    gasPrice: number;
-    nonce: number;
+export interface TransactionData {
+  hash: string;
+  type: string;
+  height: string;
+  version: string;
+  sender: string;
+  nonce: string;
+  receiver: string;
+  payload: {
+    name: string;
+    args: {
+      type: string;
+      name: string;
+      value: string;
+    } [];
+  };
+  gasPrice: string;
+  gasLimit: string;
+  receipt: {
+    transaction: string;
+    result: string;
+    gasUsed: string;
+    code: string;
     events: TransctionEvent[];
   };
+}
+
+export interface GetTransactionResponse {
+  transaction: TransactionData;
 }
 
 export interface CallRequest {
   address: string;
   method: string;
-  args: string[];
+  params: string[];
   height?: number;
 }
 
 export interface CallResponse {
-  value: number;
+  result: number;
+  code: number;
   events: TransctionEvent[];
 }
 
@@ -135,26 +161,32 @@ export default class Client {
     if (address instanceof Account) {
       address = address.toString();
     }
-    return this.request<GetAccountRequest, GetAccountResponse>('storage.GetAccount', {
+    return this.request<GetAccountRequest, GetAccountResponse>('chain.GetAccount', {
       address,
     });
   }
 
   async getTransaction(hash: string): Promise<GetTransactionResponse> {
-    return this.request<GetTransactionRequest, GetTransactionResponse>('chain.GetTx', {
+    return this.request<GetTransactionRequest, GetTransactionResponse>('chain.GetTransaction', {
       hash,
     });
   }
 
-  async call(address: string | Account, method: string, args: string[], height?: number): Promise<CallResponse> {
+  async call(address: string | Account, method: string, params: string[], height?: number): Promise<CallResponse> {
     if (address instanceof Account) {
       address = address.toString();
     }
-    return this.request<CallRequest, CallResponse>('storage.Call', {
+    return this.request<CallRequest, CallResponse>('chain.Call', {
       address,
       method,
-      args,
+      params,
       height: height || 0,
+    });
+  }
+
+  async getBlockByHeight(height: number): Promise<GetBlockResponse> {
+    return this.request<GetBlockByHeightRequest, GetBlockResponse>('chain.GetBlockByHeight', {
+      height,
     });
   }
 }

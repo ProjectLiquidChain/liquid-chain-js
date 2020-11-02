@@ -56,11 +56,16 @@ export class Parameter {
   }
 
   encode(values: string | string[]): Buffer | Buffer[] {
-    if (this.isArray && Array.isArray(values)) {
-      return values.reduce((a, v) => Buffer.concat([a, this.encode(v) as Buffer]), Buffer.alloc(0));
+    const value = values as string;
+    if (this.isArray) {
+      const parseValues = value[0] === '[' && value[value.length - 1] === ']'
+        ? value.slice(1, value.length - 1).split(',')
+        : values as string[];
+      if (Array.isArray(parseValues)) {
+        return parseValues.reduce((a, v) => Buffer.concat([a, this.encode(v) as Buffer]), Buffer.alloc(0));
+      }
     }
     let ret: Buffer;
-    const value = values as string;
     switch (this.type) {
       case PrimitiveType.Uint8:
         ret = Buffer.alloc(1);
