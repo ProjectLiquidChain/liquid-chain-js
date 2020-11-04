@@ -57,6 +57,33 @@ describe('Function', function () {
       expect(data[2]).to.be.null;
     });
   });
+
+  describe('#decode', function () {
+    it('should return decoded data', function () {
+      const sampleJSON = JSON.parse(readFileSync(join(__dirname, 'parameters-abi.json'), 'utf-8'));
+      const header = Header.fromJSON(sampleJSON);
+      const decoded = header.functions[0].decode([
+        Buffer.from('928b2036', 'hex'),
+        Buffer.from('f85b01820001840000010088000000000100000081ff82ffff84ffffffff88ffffffffffffffff840000803f88000000000000f03fa358072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348a3bb83010203', 'hex'),
+        null,
+      ]);
+      console.log(decoded);
+      decoded[0].should.equal('1');
+      decoded[1].should.equal('256');
+      decoded[2].should.equal('65536');
+      decoded[3].should.equal('4294967296');
+      decoded[4].should.equal('-1');
+      decoded[5].should.equal('-1');
+      decoded[6].should.equal('-1');
+      decoded[7].should.equal('-1');
+      decoded[8].should.equal('1');
+      decoded[9].should.equal('1');
+      decoded[10].should.equal('LADSUJQLIKT4WBBLGLJ6Q36DEBJ6KFBQIIABD6B3ZWF7NIE4RIZURI53');
+      decoded[11][0].should.equal('1');
+      decoded[11][1].should.equal('2');
+      decoded[11][2].should.equal('3');
+    });
+  });
 });
 
 describe('Contract', function() {

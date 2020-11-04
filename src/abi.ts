@@ -3,7 +3,8 @@ import { encode, decode } from 'rlp';
 import Account from './account';
 import { RecursiveBuffer } from './types';
 import { Uint64LE, Int64LE } from 'int64-buffer';
-import { HASH_LENGTH, METHOD_ID_LENGTH, NULL_METHOD_ID, INIT_FUNCTION_NAME, ARRAY_SUFFIX } from './constants';
+import { HASH_LENGTH, METHOD_ID_LENGTH, NULL_METHOD_ID, INIT_FUNCTION_NAME, ARRAY_SUFFIX, ADDRESS_LENGTH } from './constants';
+import { off } from 'process';
 // blakejs do not have type defination
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { blake2b } = require('blakejs');
@@ -21,6 +22,20 @@ export enum PrimitiveType {
 	Float64,
 	Address,
 }
+
+export const PRIMITIVE_TYPE_SIZE = {
+  [PrimitiveType.Uint8.toString()]: 1,
+  [PrimitiveType.Uint16.toString()]: 2,
+  [PrimitiveType.Uint32.toString()]: 4,
+  [PrimitiveType.Uint64.toString()]: 8,
+  [PrimitiveType.Int8.toString()]: 1,
+  [PrimitiveType.Int16.toString()]: 2,
+  [PrimitiveType.Int32.toString()]: 4,
+  [PrimitiveType.Int64.toString()]: 8,
+  [PrimitiveType.Float32.toString()]: 4,
+  [PrimitiveType.Float64.toString()]: 8,
+  [PrimitiveType.Address.toString()]: ADDRESS_LENGTH,
+} as { [key: string]: number };
 
 export interface ParameterJSON {
   name: string;
@@ -66,43 +81,44 @@ export class Parameter {
       }
     }
     let ret: Buffer;
+    const length = PRIMITIVE_TYPE_SIZE[this.type.toString()];
     switch (this.type) {
       case PrimitiveType.Uint8:
-        ret = Buffer.alloc(1);
+        ret = Buffer.alloc(length);
         ret.writeUInt8(parseInt(value), 0);
         break;
       case PrimitiveType.Uint16:
-        ret = Buffer.alloc(2);
+        ret = Buffer.alloc(length);
         ret.writeUInt16LE(parseInt(value), 0);
         break;
       case PrimitiveType.Uint32:
-        ret = Buffer.alloc(4);
+        ret = Buffer.alloc(length);
         ret.writeUInt32LE(parseInt(value), 0);
         break;
       case PrimitiveType.Uint64:
         ret = new Uint64LE(value, 10).toBuffer();
         break;
       case PrimitiveType.Int8:
-        ret = Buffer.alloc(1);
+        ret = Buffer.alloc(length);
         ret.writeInt8(parseInt(value), 0);
         break;
       case PrimitiveType.Int16:
-        ret = Buffer.alloc(2);
+        ret = Buffer.alloc(length);
         ret.writeInt16LE(parseInt(value), 0);
         break;
       case PrimitiveType.Int32:
-        ret = Buffer.alloc(4);
+        ret = Buffer.alloc(length);
         ret.writeInt32LE(parseInt(value), 0);
         break;
       case PrimitiveType.Int64:
         ret = new Int64LE(value, 10).toBuffer();
         break;
       case PrimitiveType.Float32:
-        ret = Buffer.alloc(4);
+        ret = Buffer.alloc(length);
         ret.writeFloatLE(parseFloat(value), 0);
         break;
       case PrimitiveType.Float64:
-        ret = Buffer.alloc(8);
+        ret = Buffer.alloc(length);
         ret.writeDoubleLE(parseFloat(value), 0);
         break;
       case PrimitiveType.Address:
@@ -112,6 +128,48 @@ export class Parameter {
         throw Error('Encoder not found');
     }
     return ret;
+  }
+
+  decode(raw: Buffer, isRecursive: boolean = false): string | string[] {
+    if (this.isArray && !isRecursive) {
+      let offset = 0;
+      const data = [] as Buffer[];
+      const length = PRIMITIVE_TYPE_SIZE[this.type.toString()];
+      for (;;) {
+        data.push(raw.slice(offset, offset + length));
+        offset += length;
+        if (offset >= raw.length) {
+          break;
+        }
+      }
+      return data.map((d) => this.decode(d, true) as string);
+    }
+    switch (this.type) {
+      case PrimitiveType.Uint8:
+        return raw.readUInt8(0).toString();
+      case PrimitiveType.Int8:
+        return raw.readInt8(0).toString();
+      case PrimitiveType.Uint16:
+        return raw.readUInt16LE(0).toString();
+      case PrimitiveType.Int16:
+        return raw.readInt16LE(0).toString();
+      case PrimitiveType.Uint32:
+        return raw.readUInt32LE(0).toString();
+      case PrimitiveType.Int32:
+        return raw.readInt32LE(0).toString();
+      case PrimitiveType.Uint64:
+        return new Uint64LE(raw).toString();
+      case PrimitiveType.Int64:
+        return new Int64LE(raw).toString();
+      case PrimitiveType.Float32:
+        return raw.readFloatLE(0).toString();
+      case PrimitiveType.Float64:
+        return raw.readDoubleLE(0).toString();
+      case PrimitiveType.Address:
+        return Account.fromAddress(raw).toString();
+      default:
+        throw Error('Decoder not found');
+    }
   }
 
   static fromBuffer(decoded: RecursiveBuffer): Parameter {
@@ -181,6 +239,14 @@ export class Function {
     ];
   }
 
+  decode(payload: (Buffer | null)[]): (string | string[])[] {
+    if (this.methodId.compare(payload[0] as Buffer) !== 0) {
+      throw Error('Function name mismatch');
+    }
+    const decoded = decode(payload[1]) as RecursiveBuffer;
+    return (decoded as Buffer[]).map((d, i) => this.parameters[i].decode(d));
+  }
+
   static fromBuffer(decoded: RecursiveBuffer): Function {
     return new Function(
       decoded[0].toString(),
@@ -241,7 +307,11 @@ export class Header {
   }
 
   getFunction(name: string): Function {
-    return this.functions.find(f => f.name === name)!;
+    const func = this.functions.find(f => f.name === name);
+    if (!func) {
+      throw Error('Function not found');
+    }
+    return func;
   }
 
   static fromBuffer(data: Buffer): Header {
