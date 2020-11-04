@@ -48,7 +48,7 @@ export interface GetTransactionRequest {
 export interface Block {
   hash: string;
   time: string;
-  height: string;
+  height: number;
   parent: string;
   stateRoot: string;
   transactionRoot: string;
@@ -207,5 +207,4 @@ export class Client {
       address,
     });
   }
-
 }
