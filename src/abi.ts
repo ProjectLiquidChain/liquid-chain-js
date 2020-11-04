@@ -80,49 +80,41 @@ export class Parameter {
         return parseValues.reduce((a, v) => Buffer.concat([a, this.encode(v) as Buffer]), Buffer.alloc(0));
       }
     }
-    let ret: Buffer;
     const length = PRIMITIVE_TYPE_SIZE[this.type.toString()];
+    const ret = Buffer.alloc(length);
     switch (this.type) {
       case PrimitiveType.Uint8:
-        ret = Buffer.alloc(length);
         ret.writeUInt8(parseInt(value), 0);
         break;
       case PrimitiveType.Uint16:
-        ret = Buffer.alloc(length);
         ret.writeUInt16LE(parseInt(value), 0);
         break;
       case PrimitiveType.Uint32:
-        ret = Buffer.alloc(length);
         ret.writeUInt32LE(parseInt(value), 0);
         break;
       case PrimitiveType.Uint64:
-        ret = new Uint64LE(value, 10).toBuffer();
+        new Uint64LE(value, 10).toBuffer().copy(ret);
         break;
       case PrimitiveType.Int8:
-        ret = Buffer.alloc(length);
         ret.writeInt8(parseInt(value), 0);
         break;
       case PrimitiveType.Int16:
-        ret = Buffer.alloc(length);
         ret.writeInt16LE(parseInt(value), 0);
         break;
       case PrimitiveType.Int32:
-        ret = Buffer.alloc(length);
         ret.writeInt32LE(parseInt(value), 0);
         break;
       case PrimitiveType.Int64:
-        ret = new Int64LE(value, 10).toBuffer();
+        new Int64LE(value, 10).toBuffer().copy(ret);
         break;
       case PrimitiveType.Float32:
-        ret = Buffer.alloc(length);
         ret.writeFloatLE(parseFloat(value), 0);
         break;
       case PrimitiveType.Float64:
-        ret = Buffer.alloc(length);
         ret.writeDoubleLE(parseFloat(value), 0);
         break;
       case PrimitiveType.Address:
-        ret = Account.fromString(value).address;
+        Account.fromString(value).address.copy(ret);
         break;
       default:
         throw Error('Encoder not found');
@@ -130,46 +122,52 @@ export class Parameter {
     return ret;
   }
 
-  decode(raw: Buffer, isRecursive: boolean = false): string | string[] {
-    if (this.isArray && !isRecursive) {
-      let offset = 0;
-      const data = [] as Buffer[];
-      const length = PRIMITIVE_TYPE_SIZE[this.type.toString()];
-      for (;;) {
-        data.push(raw.slice(offset, offset + length));
-        offset += length;
-        if (offset >= raw.length) {
+  decode(raw: Buffer): string | string[] {
+    let offset = 0;
+    const length = PRIMITIVE_TYPE_SIZE[this.type.toString()];
+    const result = [] as string[];
+    while (offset < raw.length) {
+      const data = raw.slice(offset, offset + length);
+      switch (this.type) {
+        case PrimitiveType.Uint8:
+          result.push(data.readUInt8(0).toString());
           break;
-        }
+        case PrimitiveType.Int8:
+          result.push(data.readInt8(0).toString());
+          break;
+        case PrimitiveType.Uint16:
+          result.push(data.readUInt16LE(0).toString());
+          break;
+        case PrimitiveType.Int16:
+          result.push(data.readInt16LE(0).toString());
+          break;
+        case PrimitiveType.Uint32:
+          result.push(data.readUInt32LE(0).toString());
+          break;
+        case PrimitiveType.Int32:
+          result.push(data.readInt32LE(0).toString());
+          break;
+        case PrimitiveType.Uint64:
+          result.push(new Uint64LE(data).toString());
+          break;
+        case PrimitiveType.Int64:
+          result.push(new Int64LE(data).toString());
+          break;
+        case PrimitiveType.Float32:
+          result.push(data.readFloatLE(0).toString());
+          break;
+        case PrimitiveType.Float64:
+          result.push(data.readDoubleLE(0).toString());
+          break;
+        case PrimitiveType.Address:
+          result.push(Account.fromAddress(data).toString());
+          break;
+        default:
+          throw Error('Decoder not found');
       }
-      return data.map((d) => this.decode(d, true) as string);
+      offset += length;
     }
-    switch (this.type) {
-      case PrimitiveType.Uint8:
-        return raw.readUInt8(0).toString();
-      case PrimitiveType.Int8:
-        return raw.readInt8(0).toString();
-      case PrimitiveType.Uint16:
-        return raw.readUInt16LE(0).toString();
-      case PrimitiveType.Int16:
-        return raw.readInt16LE(0).toString();
-      case PrimitiveType.Uint32:
-        return raw.readUInt32LE(0).toString();
-      case PrimitiveType.Int32:
-        return raw.readInt32LE(0).toString();
-      case PrimitiveType.Uint64:
-        return new Uint64LE(raw).toString();
-      case PrimitiveType.Int64:
-        return new Int64LE(raw).toString();
-      case PrimitiveType.Float32:
-        return raw.readFloatLE(0).toString();
-      case PrimitiveType.Float64:
-        return raw.readDoubleLE(0).toString();
-      case PrimitiveType.Address:
-        return Account.fromAddress(raw).toString();
-      default:
-        throw Error('Decoder not found');
-    }
+    return this.isArray ? result : result[0];
   }
 
   static fromBuffer(decoded: RecursiveBuffer): Parameter {
