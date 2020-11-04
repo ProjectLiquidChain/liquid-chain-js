@@ -1,7 +1,7 @@
 import Account from './account';
 import Transaction from './transaction';
-import Client from './client';
+import * as rpc from './rpc';
 import * as abi from './abi';
 import * as constants from './constants';
 
-export { Account, Transaction, Client, abi, constants };
+export { Account, Transaction, rpc, abi, constants };
