@@ -187,7 +187,7 @@ export class Client {
       address,
       method,
       args,
-      height: height || 0,
+      height,
     });
   }
 
