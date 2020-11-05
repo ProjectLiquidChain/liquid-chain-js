@@ -8,13 +8,13 @@ import { RecursiveBuffer } from './types';
 const { blake2b } = require('blakejs');
 
 export interface TransactionJSON {
-  version: string;
+  version: number;
   from: string;
   nonce: string;
   payload: (string | null)[],
   to: string | null;
-  gasLimit: string;
-  gasPrice: string;
+  gasPrice: number;
+  gasLimit: number;
   signature: string | null;
 }
 
@@ -25,8 +25,8 @@ export default class Transaction {
   nonce: BN;
   payload: (Buffer |  null)[];
   to: Account | null;
-  gasLimit: BN;
   gasPrice: BN;
+  gasLimit: BN;
   signature: Buffer | null; 
   
   constructor(params: { 
@@ -35,8 +35,8 @@ export default class Transaction {
       nonce: number | string | BN;
       to?: Account | null;
       payload: (Buffer | null)[];
-      gasLimit: number | string | BN;
       gasPrice: number | string | BN;
+      gasLimit: number | string | BN;
       signature?: Buffer | null;
     }) {
     this.version = new BN(params.version);
@@ -44,8 +44,8 @@ export default class Transaction {
     this.nonce = new BN(params.nonce);
     this.payload = params.payload;
     this.to = params.to || null;
-    this.gasLimit = new BN(params.gasLimit);
     this.gasPrice = new BN(params.gasPrice);
+    this.gasLimit = new BN(params.gasLimit);
     this.signature = null;
     if (params.signature) {
       this.sign(params.signature);
@@ -62,8 +62,8 @@ export default class Transaction {
       sender,
       this.to ? this.to.address : NULL_ADDRESS,
       this.payload,
-      this.gasLimit.isZero() ? 0 : this.gasLimit,
       this.gasPrice.isZero() ? 0 : this.gasPrice,
+      this.gasLimit.isZero() ? 0 : this.gasLimit,
     ];
     if (includeSignature && this.signature) {
       if (!this.signature) {
@@ -96,13 +96,13 @@ export default class Transaction {
 
   toJSON(): TransactionJSON {
     return {
-      version: this.version.toString(),
+      version: this.version.toNumber(),
       from: this.from.toString(),
       nonce: this.nonce.toString(),
       payload: this.payload.map(p => p ? p.toString('hex') : null),
       to: this.to ? this.to.toString() : null,
-      gasLimit: this.gasLimit.toString(),
-      gasPrice: this.gasPrice.toString(),
+      gasPrice: this.gasPrice.toNumber(),
+      gasLimit: this.gasLimit.toNumber(),
       signature: this.signature ? this.signature.toString('hex') : null,
     }
   }
@@ -118,8 +118,8 @@ export default class Transaction {
       nonce: new BN(sender[1]),
       to: tx[1].length > 0 && NULL_ADDRESS.compare(tx[2]) !== 0 ? Account.fromAddress(tx[2]) : null,
       payload: payload.map(p => p.length > 0 ? p : null),
-      gasLimit: new BN(tx[4]),
-      gasPrice: new BN(tx[5]),
+      gasPrice: new BN(tx[4]),
+      gasLimit: new BN(tx[5]),
       signature: tx[6] && tx[6].length > 0 ? tx[6] : null,
     });
   }

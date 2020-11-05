@@ -67,7 +67,6 @@ describe('Function', function () {
         Buffer.from('f85b01820001840000010088000000000100000081ff82ffff84ffffffff88ffffffffffffffff840000803f88000000000000f03fa358072a260b42a7cb042b32d3e86fc32053e51430420011f83bcd8bf6a09c8a3348a3bb83010203', 'hex'),
         null,
       ]);
-      console.log(decoded);
       decoded[0].should.equal('1');
       decoded[1].should.equal('256');
       decoded[2].should.equal('65536');
