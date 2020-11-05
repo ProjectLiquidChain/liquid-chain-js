@@ -37,8 +37,10 @@ export interface GetAccountResponse {
 }
 
 export interface GetContractResponse {
-  header: HeaderJSON;
-  code: string;
+  contract: {
+    header: HeaderJSON;
+    code: string;
+  };
 }
 
 export interface GetTransactionRequest {
