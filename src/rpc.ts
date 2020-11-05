@@ -56,6 +56,7 @@ export interface Block {
   transactionRoot: string;
   receiptRoot: string;
   transactions: TransactionData[];
+  receipts: Receipt[];
 }
 
 export interface GetBlockByHeightRequest {
@@ -78,6 +79,14 @@ export interface TransctionEvent {
   attributes: TransctionEventAttribute[];
 }
 
+export interface Receipt {
+  transaction: string;
+  result: string;
+  gasUsed: number;
+  code: number;
+  events: TransctionEvent[];
+};
+
 export interface TransactionData {
   hash: string;
   type: string;
@@ -96,18 +105,12 @@ export interface TransactionData {
   };
   gasPrice: string;
   gasLimit: string;
-  receipt: {
-    transaction: string;
-    result: string;
-    gasUsed: number;
-    code: number;
-    events: TransctionEvent[];
-  };
 }
 
 export interface GetTransactionResponse {
   transaction: TransactionData;
-}
+  receipt: Receipt;
+};
 
 export interface CallRequest {
   address: string;
