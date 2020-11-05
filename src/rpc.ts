@@ -97,8 +97,8 @@ export interface TransactionData {
   receipt: {
     transaction: string;
     result: string;
-    gasUsed: string;
-    code: string;
+    gasUsed: number;
+    code: number;
     events: TransctionEvent[];
   };
 }
