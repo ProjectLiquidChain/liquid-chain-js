@@ -167,6 +167,32 @@ export class Client {
     return res;
   }
 
+  async broadcastCommit(data: string | Buffer | Transaction): Promise<BroadcastResponse> {
+    if (data instanceof Transaction) {
+      data = data.toBuffer();
+    }
+    const res = await this.request<BroadcastRequest, BroadcastResponse>('chain.BroadcastCommit', {
+      rawTx: typeof data === 'string' ? data : data.toString('base64'),
+    });
+    if (res.code !== 0) {
+      throw Error(res.log);
+    }
+    return res;
+  }
+
+  async broadcastAsync(data: string | Buffer | Transaction): Promise<BroadcastResponse> {
+    if (data instanceof Transaction) {
+      data = data.toBuffer();
+    }
+    const res = await this.request<BroadcastRequest, BroadcastResponse>('chain.BroadcastAsync', {
+      rawTx: typeof data === 'string' ? data : data.toString('base64'),
+    });
+    if (res.code !== 0) {
+      throw Error(res.log);
+    }
+    return res;
+  }
+
   async getAccount(address: string | Account): Promise<GetAccountResponse> {
     if (address instanceof Account) {
       address = address.toString();
